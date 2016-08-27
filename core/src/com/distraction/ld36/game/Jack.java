@@ -6,19 +6,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.distraction.ld36.Content;
 
-public class Jack {
+public class Jack extends GameObject {
 
     private Person person;
-
-    private int x;
-    private int y;
     private int id;
 
     private TextureRegion image;
 
     private boolean lit;
     private boolean taken;
-    private boolean hasCord;
+    private Cord cord;
 
     private BitmapFont font;
 
@@ -28,6 +25,9 @@ public class Jack {
         this.id = id;
 
         image = new TextureRegion(Content.getTexture("test"));
+        width = image.getRegionWidth();
+        height = image.getRegionHeight();
+
         font = new BitmapFont();
         font.setColor(Color.BLACK);
     }
@@ -45,19 +45,19 @@ public class Jack {
         this.person = person;
     }
 
-    public void update(float dt) {
-
+    public void setCord(Cord cord) {
+        this.cord = cord;
     }
 
     public void render(SpriteBatch sb) {
         sb.setColor(Color.BLACK);
-        sb.draw(image, x - image.getRegionWidth() / 2, y - image.getRegionHeight() / 2);
+        sb.draw(image, x - width / 2, y - height / 2);
         if(lit) {
             sb.setColor(Color.GREEN);
         }
-        sb.draw(image, x - image.getRegionWidth() / 2 + 5, y - image.getRegionHeight() / 2 + 20);
+        sb.draw(image, x - width / 2 + 5, y - height / 2 + 20);
         sb.setColor(Color.BLACK);
-        font.draw(sb, "" + id, x - image.getRegionWidth() / 2 - 5, y - image.getRegionHeight() / 2 + 30);
+        font.draw(sb, "" + id, x - width / 2 - 5, y - height / 2 + 30);
     }
 
 }
