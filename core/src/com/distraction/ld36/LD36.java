@@ -16,7 +16,7 @@ public class LD36 extends ApplicationAdapter {
     @Override
     public void create() {
 
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
 
         sb = new SpriteBatch();
 

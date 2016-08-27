@@ -16,29 +16,35 @@ public class TopPanel {
         this.manual = manual;
 
         jacks = new Jack[Vars.NUM_JACK_ROWS][Vars.NUM_JACK_COLS];
-        for(int row = 0; row < Vars.NUM_JACK_ROWS; row++) {
-            for(int col = 0; col < Vars.NUM_JACK_COLS; col++) {
-                jacks[row][col] = new Jack();
+
+        int width = Vars.PANEL_WIDTH / jacks[0].length;
+        int height = Vars.HEIGHT / 2 / jacks.length;
+
+        for(int row = 0; row < jacks.length; row++) {
+            for(int col = 0; col < jacks[0].length; col++) {
+                jacks[row][col] = new Jack(col * width + width / 2, Vars.HEIGHT - (row * height + height / 2), row * jacks[0].length + col);
             }
         }
 
-        nextTime = randomNextTime();
+        nextTime = 5;
     }
 
     private void createCaller() {
 
-        do {
-            int row = (int) (Math.random() * Vars.NUM_JACK_ROWS);
-            int col = (int) (Math.random() * Vars.NUM_JACK_COLS);
+        System.out.println("creating caller");
 
-            if (!jacks[row][col].isAvailable()) {
+        do {
+            int row = (int) (Math.random() * jacks.length);
+            int col = (int) (Math.random() * jacks[0].length);
+
+            if (jacks[row][col].isAvailable()) {
 
                 do {
 
-                    int row2 = (int) (Math.random() * Vars.NUM_JACK_ROWS);
-                    int col2 = (int) (Math.random() * Vars.NUM_JACK_COLS);
+                    int row2 = (int) (Math.random() * jacks.length);
+                    int col2 = (int) (Math.random() * jacks[0].length);
 
-                    if (!jacks[row2][col2].isAvailable()) {
+                    if (jacks[row2][col2].isAvailable()) {
 
                         String areaCode = manual.getAreaCode(row2, col2);
                         String number = ManualUtils.formatRandomNumber(areaCode);
@@ -74,7 +80,11 @@ public class TopPanel {
 
     public void render(SpriteBatch sb) {
 
-
+        for(int row = 0; row < jacks.length; row++) {
+            for(int col = 0; col < jacks[0].length; col++) {
+                jacks[row][col].render(sb);
+            }
+        }
 
     }
 
