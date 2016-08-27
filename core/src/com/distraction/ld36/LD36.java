@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.distraction.ld36.state.GSM;
-import com.distraction.ld36.state.TestState;
+import com.distraction.ld36.state.PlayState;
 
 public class LD36 extends ApplicationAdapter {
 
@@ -21,7 +21,7 @@ public class LD36 extends ApplicationAdapter {
         sb = new SpriteBatch();
 
         gsm = new GSM();
-        gsm.pushState(new TestState(gsm));
+        gsm.pushState(new PlayState(gsm));
 
     }
 

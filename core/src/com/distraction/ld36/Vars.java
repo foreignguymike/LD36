@@ -6,4 +6,10 @@ public class Vars {
     public static final int HEIGHT = 300;
     public static final int SCALE = 2;
 
+    public static final int NUM_JACK_ROWS = 4;
+    public static final int NUM_JACK_COLS = 6;
+
+    public static final float CALL_MIN_TIME = 15;
+    public static final float CALL_RAND = 10;
+
 }
