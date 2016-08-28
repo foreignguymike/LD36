@@ -39,7 +39,7 @@ public class Vars {
     public static final Float[] CALL_TIMES2 =
             {4f, 4f, 0.3f, 4.5f, 4.5f, 0.2f, 4.0f, 4.0f, 0.2f, 0.2f, 4.0f, 4.0f, 0.2f, 3.5f};
     public static final Float[] CALL_TIMES3 =
-            {2.5f, 2.5f, 2.4f, 2.4f, 2.5f, 2.4f, 2.5f, 2.4f, 2.5f, 2.2f, 2f, 2f, 2f, 2f};
+            {2.5f, 2.5f, 2.4f, 2.4f, 2.5f, 2.4f, 2.5f, 2.4f, 2.5f, 2.2f, 2f, 2f, 2f, 2f, 1.6f, 1.4f, 1.4f};
     public static final List<List<Float>> CALL_TIMES;
     public static final int NUM_CALLS;
     public static final float TOTAL_TIME;
