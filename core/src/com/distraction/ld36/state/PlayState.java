@@ -44,6 +44,9 @@ public class PlayState extends State implements Jack.JackListener {
     private String manualString = "MANUAL";
     private Rectangle manualRect = new Rectangle(Vars.PANEL_WIDTH, Vars.HEIGHT - 30, Vars.WIDTH - Vars.PANEL_WIDTH, 30);
 
+    private int points;
+    private boolean done;
+
     public PlayState(GSM gsm) {
         super(gsm);
 
@@ -98,6 +101,14 @@ public class PlayState extends State implements Jack.JackListener {
         }
     }
 
+    private float getNextTime() {
+        if (callCount == Vars.CALL_TIMES.length) {
+            done = true;
+            return -1;
+        }
+        return Vars.CALL_TIMES[callCount++];
+    }
+
     private void createCaller() {
 
         List<Manual.Element> elements = new ArrayList<Manual.Element>();
@@ -137,15 +148,16 @@ public class PlayState extends State implements Jack.JackListener {
 
     }
 
-    private float getNextTime() {
-        return Vars.CALL_TIMES[callCount++];
-    }
-
     @Override
     public void onTalk(Person caller) {
         if (!callers.contains(caller)) {
             callers.add(0, caller);
         }
+    }
+
+    @Override
+    public void finish() {
+        points++;
     }
 
     @Override
@@ -160,7 +172,7 @@ public class PlayState extends State implements Jack.JackListener {
         time += dt;
 
         // create a new caller
-        if (time >= nextTime) {
+        if (!done && time >= nextTime) {
             time = 0;
             nextTime = getNextTime();
             createCaller();
@@ -327,7 +339,7 @@ public class PlayState extends State implements Jack.JackListener {
                 }
             }
 
-            if(!hit) {
+            if (!hit) {
                 draggingCord.setToOriginalPosition();
             }
 

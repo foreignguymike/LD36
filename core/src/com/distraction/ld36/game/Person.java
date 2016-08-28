@@ -16,6 +16,7 @@ public class Person extends GameObject {
     private String id;
     private String areaCode;
     private String formattedAreaCode;
+    private String connectedString = "Connected";
     private String number;
 
     private Jack originalJack;
@@ -30,6 +31,7 @@ public class Person extends GameObject {
     private BitmapFont font;
     private float idWidth;
     private float numberWidth;
+    private float connectedWidth;
 
     private boolean waiting = true;
     private float patienceTime = (float) (Math.random() * Vars.PATIENCE_RAND + Vars.PATIENCE_MIN_TIME);
@@ -53,11 +55,14 @@ public class Person extends GameObject {
         id = originalJack.getId();
 
         font = Content.getFont("mainFont");
+
         GlyphLayout glyph = new GlyphLayout();
         glyph.setText(font, String.valueOf(id));
         idWidth = glyph.width;
         glyph.setText(font, formattedAreaCode);
         numberWidth = glyph.width;
+        glyph.setText(font, connectedString);
+        connectedWidth = glyph.width;
 
         pixel = Content.getAtlas("main").findRegion("pixel");
     }
@@ -103,7 +108,7 @@ public class Person extends GameObject {
 
         if (waiting) {
             patienceTime -= dt;
-            if(patienceTime < 0) {
+            if (patienceTime < 0) {
                 remove();
                 originalJack.clear();
                 callingJack.clear();
@@ -148,7 +153,12 @@ public class Person extends GameObject {
         }
         font.setColor(Color.BLACK);
         font.draw(sb, id, x - width / 2 + 14 - idWidth / 2, y + 4);
-        font.draw(sb, formattedAreaCode, x + width / 2 - 40 - numberWidth / 2, y + 4);
+        if (originalJack.isFinished()) {
+            sb.setColor(Color.GREEN);
+            font.draw(sb, formattedAreaCode, x + width / 2 - 40 - connectedWidth / 2, y + 4);
+        } else {
+            font.draw(sb, formattedAreaCode, x + width / 2 - 40 - numberWidth / 2, y + 4);
+        }
     }
 
 }

@@ -25,19 +25,37 @@ public class Vars {
 
     public static final float CALLING_OPERATOR_TIME = 10;
 
-    private static int time;
+
     public static final int[] CALL_TIMES =
             {
-                    time += 1,
-                    time += 20,
-                    time += 19,
-                    time += 18,
-                    time += 18,
-                    time += 17,
+                    // start
 
-                    time += 1,
-                    time += 1,
-                    time += 1,
+                    1,
+                    20,
+                    19,
+                    18,
+                    18,
+
+                    // rush it
+
+                    13,
+                    13,
+                    12,
+                    12,
+                    11,
+                    11,
+                    10,
+                    10,
+
+                    // finish
+
+                    3,
+                    3,
+                    3,
+                    2,
+                    2,
+                    1,
+                    1
             };
 
 }

@@ -12,6 +12,8 @@ public class Jack extends GameObject {
 
     public interface JackListener {
         void onTalk(Person person);
+
+        void finish();
     }
 
     private Person caller;
@@ -37,6 +39,7 @@ public class Jack extends GameObject {
 
     private boolean talkedTo;
     private boolean waitingForPickup;
+    private boolean conversing;
 
     private TextureRegion jackImage;
     private TextureRegion redLightImage;
@@ -83,13 +86,18 @@ public class Jack extends GameObject {
     }
 
     public void talk() {
+        linked = false;
+        if (conversing) {
+            talking = false;
+            callingJack.setTalking(false);
+            return;
+        }
         if (caller == null) {
             return;
         }
         talkedTo = true;
         jackListener.onTalk(caller);
         ringing = false;
-        linked = false;
         talkingTo = true;
     }
 
@@ -110,16 +118,30 @@ public class Jack extends GameObject {
             return;
         }
         linked = true;
+        if (conversing) {
+            if(callingJack.isLinked()) {
+                talking = true;
+                callingJack.setTalking(true);
+            }
+            return;
+        }
         if (callingJack.isLinked()) {
             setTalkTimer((float) (Math.random() * 15 + 5));
             callingJack.setTalkTimer(talkTimer);
             setTalking(true);
             callingJack.setTalking(true);
+            setConversing(true);
+            callingJack.setConversing(true);
         }
     }
 
     public void ring() {
         linked = false;
+        if (conversing) {
+            talking = false;
+            callingJack.setTalking(false);
+            return;
+        }
         if (pickedUp) {
             return;
         }
@@ -160,6 +182,10 @@ public class Jack extends GameObject {
         }
     }
 
+    public void setConversing(boolean conversing) {
+        this.conversing = conversing;
+    }
+
     public void setTalkTimer(float talkTimer) {
         this.talkTimer = talkTimer;
     }
@@ -186,6 +212,7 @@ public class Jack extends GameObject {
 
     public void clear() {
         talkedTo = false;
+        conversing = false;
         waitingForPickup = false;
         talkingTo = false;
         lit = false;
@@ -214,12 +241,16 @@ public class Jack extends GameObject {
             if (pickupTime >= pickupTimer) {
                 ringing = false;
                 pickedUp = true;
+                waitingForPickup = false;
             }
         }
 
         if (talking) {
             talkTime += dt;
             if (talkTime >= talkTimer) {
+                if (caller != null) {
+                    jackListener.finish();
+                }
                 if (caller != null) {
                     caller.remove();
                 }
@@ -242,7 +273,7 @@ public class Jack extends GameObject {
             }
         } else if (linked && !talking) {
             sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
-        } else if ((lit && talkingTo) || (caller == null && pickedUp)) {
+        } else if ((lit && talkingTo) || (caller == null && pickedUp && !linked)) {
             if (baseTime % 0.6f < 0.3f) {
                 sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
             } else {
@@ -257,15 +288,14 @@ public class Jack extends GameObject {
         } else {
             sb.draw(offLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
         }
+
         if (waitingForPickup) {
             sb.setColor(Color.GREEN);
             sb.draw(pixel, x - width / 2, y + 12, width * (pickupTimer - pickupTime) / Vars.PICKUP_MAX_TIME, 2);
-        }
-        if (talking) {
+        } else if (conversing) {
             sb.setColor(Color.GREEN);
             sb.draw(pixel, x - width / 2, y + 12, width * (talkTimer - talkTime) / Vars.CALL_MAX_TIME, 2);
-        }
-        if (caller != null && !talkedTo) {
+        } else if (caller != null && !talkedTo) {
             sb.setColor(Color.GREEN);
             sb.draw(pixel, x - width / 2, y + 12, width * (Vars.CALLING_OPERATOR_TIME - callOperatorTime) / Vars.CALLING_OPERATOR_TIME, 2);
         }
