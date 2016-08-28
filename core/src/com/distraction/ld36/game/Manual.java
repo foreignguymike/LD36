@@ -13,8 +13,8 @@ public class Manual {
         areaCodes = new String[Vars.NUM_JACK_ROWS][Vars.NUM_JACK_COLS];
 
         Set<String> existingNumbers = new HashSet<String>();
-        for(int row = 0; row < Vars.NUM_JACK_ROWS; row++) {
-            for(int col = 0; col < Vars.NUM_JACK_COLS; col++) {
+        for (int row = 0; row < areaCodes.length; row++) {
+            for (int col = 0; col < areaCodes[0].length; col++) {
 
                 do {
                     String areaCode = String.valueOf((int) (Math.random() * 900 + 100));
@@ -26,13 +26,46 @@ public class Manual {
                     areaCodes[row][col] = areaCode;
 
                     break;
-                } while(true);
+                } while (true);
             }
         }
     }
 
     public String getAreaCode(int row, int col) {
         return areaCodes[row][col];
+    }
+
+    public Element getCoordinatesFromAreaCode(String areaCode) {
+        for (int row = 0; row < areaCodes.length; row++) {
+            for (int col = 0; col < areaCodes[0].length; col++) {
+                if (areaCodes[row][col].equals(areaCode)) {
+                    return new Element(row, col);
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String formatRandomNumberFromAreaCode(String areaCode) {
+        return "(" + areaCode + ") 555-" + String.valueOf((int) (Math.random() * 9000 + 1000));
+    }
+
+    public static class Element {
+        private int row;
+        private int col;
+
+        public Element(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getCol() {
+            return col;
+        }
     }
 
 }

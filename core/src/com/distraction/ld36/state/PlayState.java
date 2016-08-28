@@ -6,14 +6,13 @@ import com.distraction.ld36.Vars;
 import com.distraction.ld36.game.Cord;
 import com.distraction.ld36.game.Jack;
 import com.distraction.ld36.game.Manual;
-import com.distraction.ld36.game.ManualUtils;
 import com.distraction.ld36.game.Person;
 import com.distraction.ld36.game.Switch;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayState extends State {
+public class PlayState extends State implements Jack.JackListener {
 
     private Manual manual;
 
@@ -30,6 +29,8 @@ public class PlayState extends State {
     private int draggingSwitchy;
 
     private Cord draggingCord;
+    private int draggingCordRow;
+    private int draggingCordCol;
 
     public PlayState(GSM gsm) {
         super(gsm);
@@ -37,8 +38,8 @@ public class PlayState extends State {
         manual = new Manual();
 
         initJacks();
-        initSwitches();
         initCords();
+        initSwitches();
 
         callers = new ArrayList<Person>();
 
@@ -51,10 +52,14 @@ public class PlayState extends State {
         int height = Vars.HEIGHT / 2 / jacks.length;
         for (int row = 0; row < jacks.length; row++) {
             for (int col = 0; col < jacks[0].length; col++) {
-                jacks[row][col] = new Jack(col * width + width / 2, Vars.HEIGHT - (row * height + height / 2), row * jacks[0].length + col);
+                jacks[row][col] = new Jack(
+                        col * width + width / 2,
+                        Vars.HEIGHT - (row * height + height / 2),
+                        row * jacks[0].length + col,
+                        this);
             }
         }
-        nextTime = 5;
+        nextTime = 0;
     }
 
     private void initSwitches() {
@@ -62,7 +67,7 @@ public class PlayState extends State {
         int width = Vars.PANEL_WIDTH / switches[0].length;
         for (int row = 0; row < switches.length; row++) {
             for (int col = 0; col < switches[0].length; col++) {
-                switches[row][col] = new Switch(col * width + width / 2 - 10, Vars.HEIGHT / 2 / 2 + 20 - row * 40);
+                switches[row][col] = new Switch(col * width + width / 2 - 10, Vars.HEIGHT / 2 / 2 + 20 - row * 40, cords[row][col]);
             }
         }
     }
@@ -90,14 +95,18 @@ public class PlayState extends State {
                     int row2 = (int) (Math.random() * jacks.length);
                     int col2 = (int) (Math.random() * jacks[0].length);
 
+                    if (row == row2 && col == col2) {
+                        continue;
+                    }
+
                     if (jacks[row2][col2].isAvailable()) {
 
                         String areaCode = manual.getAreaCode(row2, col2);
-                        String number = ManualUtils.formatRandomNumber(areaCode);
+                        String number = Manual.formatRandomNumberFromAreaCode(areaCode);
 
-                        Person caller = new Person(number);
-                        callers.add(caller);
-                        jacks[row][col].setPerson(caller);
+                        Manual.Element element = manual.getCoordinatesFromAreaCode(areaCode);
+                        Person caller = new Person(number, jacks[element.getRow()][element.getCol()]);
+                        jacks[row][col].setCaller(caller);
 
                         break;
                     }
@@ -115,6 +124,13 @@ public class PlayState extends State {
     }
 
     @Override
+    public void onTalk(Person caller) {
+        if (!callers.contains(caller)) {
+            callers.add(caller);
+        }
+    }
+
+    @Override
     public void update(float dt) {
 
         // next caller timer
@@ -125,6 +141,25 @@ public class PlayState extends State {
             time = 0;
             nextTime = randomNextTime();
             createCaller();
+        }
+
+        for (Jack[] jackArray : jacks) {
+            for (Jack jack : jackArray) {
+                jack.update(dt);
+            }
+        }
+
+        for (int i = 0; i < callers.size(); i++) {
+            Person caller = callers.get(i);
+            caller.setDest(caller.getxdest(), i * caller.getHeight() + caller.getHeight() / 2);
+        }
+
+        for (int i = callers.size() - 1; i >= 0; i--) {
+            Person caller = callers.get(i);
+            caller.update(dt);
+            if(caller.isCleared()) {
+                callers.remove(i);
+            }
         }
 
     }
@@ -150,6 +185,10 @@ public class PlayState extends State {
             for (Cord cord : cordArray) {
                 cord.render(sb);
             }
+        }
+
+        for (Person caller : callers) {
+            caller.render(sb);
         }
 
         sb.end();
@@ -191,10 +230,13 @@ public class PlayState extends State {
             }
         }
 
-        for (Cord[] cordArray : cords) {
-            for (Cord cord : cordArray) {
+        for (int row = 0; row < cords.length; row++) {
+            for (int col = 0; col < cords[row].length; col++) {
+                Cord cord = cords[row][col];
                 if (cord.contains(m.x, m.y)) {
                     draggingCord = cord;
+                    draggingCordRow = row;
+                    draggingCordCol = col;
                     Jack jack = draggingCord.getJack();
                     if (jack != null) {
                         jack.setCord(null);
@@ -216,11 +258,35 @@ public class PlayState extends State {
 
         if (draggingCord != null) {
 
-            for (Jack[] jackArray : jacks) {
-                for (Jack jack : jackArray) {
+            for (int row = 0; row < jacks.length; row++) {
+                for (int col = 0; col < jacks[row].length; col++) {
+                    Jack jack = jacks[row][col];
                     if (jack.contains(m.x, m.y)) {
-                        draggingCord.setJack(jack);
-                        jack.setCord(draggingCord);
+                        if (jack.getCord() == null) {
+                            System.out.println("jack has no cord");
+                            Cord matchingCord;
+                            if (draggingCordRow == 0) {
+                                System.out.println("cord on first row, col: " + draggingCordCol);
+                                matchingCord = cords[1][draggingCordCol];
+                            } else {
+                                System.out.println("cord on second row, col: " + draggingCordCol);
+                                matchingCord = cords[0][draggingCordCol];
+                            }
+                            if(matchingCord.getJack() == null) {
+                                System.out.println("has no connected matching cord");
+                                if(jack.isCaller()) {
+                                    draggingCord.setJack(jack);
+                                    jack.setCord(draggingCord);
+                                }
+                            } else {
+                                System.out.println("has existing connected matching cord");
+                                Jack matchingJack = matchingCord.getJack();
+                                if(matchingJack.getCallingJack() == jack) {
+                                    draggingCord.setJack(jack);
+                                    jack.setCord(draggingCord);
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -8,8 +8,8 @@ import com.distraction.ld36.Content;
 public class Cord extends GameObject {
 
     private boolean dragging;
-    private int destx;
-    private int desty;
+    private int xdest;
+    private int ydest;
     private Jack jack;
 
     private TextureRegion image;
@@ -17,8 +17,8 @@ public class Cord extends GameObject {
     public Cord(int x, int y) {
         this.x = x;
         this.y = y;
-        destx = x;
-        desty = y;
+        xdest = x;
+        ydest = y;
 
         image = new TextureRegion(Content.getTexture("test"));
         width = image.getRegionWidth();
@@ -31,8 +31,8 @@ public class Cord extends GameObject {
 
     public void setDragging(float x, float y) {
         dragging = true;
-        destx = (int) x;
-        desty = (int) y;
+        xdest = (int) x;
+        ydest = (int) y;
     }
 
     public void setJack(Jack jack) {
@@ -45,7 +45,7 @@ public class Cord extends GameObject {
 
     @Override
     public boolean contains(float x, float y) {
-        if (jack != null) {
+        if (jack != null && jack.isAvailable()) {
             return x > jack.getx() - jack.getWidth() / 2 &&
                     x < jack.getx() + jack.getWidth() / 2 &&
                     y > jack.gety() - jack.getHeight() / 2 &&
@@ -60,12 +60,13 @@ public class Cord extends GameObject {
 
     public void render(SpriteBatch sb) {
         sb.setColor(Color.RED);
-        sb.draw(image, x - width / 2, y - height / 2);
         if (dragging) {
-            sb.draw(image, destx - width / 2, desty - height / 2);
+            sb.draw(image, xdest - width / 2, ydest - height / 2);
         }
         if (jack != null) {
             sb.draw(image, jack.getx() - width / 2, jack.gety() - height / 2);
+        } else if (!dragging){
+            sb.draw(image, x - width / 2, y - height / 2);
         }
     }
 

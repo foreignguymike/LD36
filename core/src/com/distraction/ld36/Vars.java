@@ -13,5 +13,6 @@ public class Vars {
     public static final float CALL_RAND = 10;
 
     public static final int PANEL_WIDTH = WIDTH - 100;
+    public static final int CALLER_HEIGHT = 30;
 
 }
