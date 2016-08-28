@@ -52,6 +52,7 @@ public class PlayState extends State implements Person.FinishListener {
         nextTime = getNextTime();
 
         scrollingText = new ScrollingText("START");
+        Content.getSound("start").play();
     }
 
     private void initJacks() {
@@ -82,12 +83,15 @@ public class PlayState extends State implements Person.FinishListener {
     private float getNextTime() {
         if (callCount == Vars.NUM_CALLS) {
             scrollingText = new ScrollingText("FINISHED!");
+            Content.getSound("start").play();
             done = true;
             return -1;
         } else if (callCount == Vars.CALL_TIMES1.length) {
             scrollingText = new ScrollingText("RUSH!");
+            Content.getSound("start").play();
         } else if (callCount == Vars.CALL_TIMES1.length + Vars.CALL_TIMES2.length) {
             scrollingText = new ScrollingText("BULLET!");
+            Content.getSound("start").play();
         }
         return Vars.getNextTime(callCount++);
     }
@@ -124,6 +128,7 @@ public class PlayState extends State implements Person.FinishListener {
             callers.add(0, new Person(jacks[row][col], jacks[row2][col2], this));
             jacks[row][col].setOtherJack(jacks[row2][col2]);
             jacks[row2][col2].setOtherJack(jacks[row][col]);
+            Content.getSound("ring").play(0.3f);
             break;
 
         } while (true);
@@ -133,6 +138,7 @@ public class PlayState extends State implements Person.FinishListener {
     @Override
     public void onFinish() {
         points++;
+        Content.getSound("point").play();
     }
 
     @Override
@@ -303,6 +309,13 @@ public class PlayState extends State implements Person.FinishListener {
                 if (hit) {
                     break;
                 }
+
+            }
+
+            if(hit) {
+                Content.getSound("plugin").play(0.2f);
+            } else {
+                Content.getSound("miss").play(0.5f);
             }
 
             draggingCord.setDraggingFalse();

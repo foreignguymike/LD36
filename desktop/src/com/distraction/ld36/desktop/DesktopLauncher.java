@@ -8,6 +8,7 @@ import com.distraction.ld36.Vars;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+        config.title = Vars.TITLE;
         config.width = Vars.WIDTH * Vars.SCALE;
         config.height = Vars.HEIGHT * Vars.SCALE;
         new LwjglApplication(new LD36(), config);

@@ -1,6 +1,7 @@
 package com.distraction.ld36;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,13 +15,21 @@ import java.util.Map;
 public class Content {
 
     private static Map<String, TextureAtlas> atlasMap;
+    private static Map<String, Sound> soundMap;
     private static Map<String, BitmapFont> fontMap;
 
     static {
         atlasMap = new HashMap<String, TextureAtlas>();
+        soundMap = new HashMap<String, Sound>();
         fontMap = new HashMap<String, BitmapFont>();
 
         putAtlas("main", new TextureAtlas(Gdx.files.internal("pack.pack")));
+
+        putSound("miss", Gdx.audio.newSound(Gdx.files.internal("miss.wav")));
+        putSound("plugin", Gdx.audio.newSound(Gdx.files.internal("plugin.wav")));
+        putSound("point", Gdx.audio.newSound(Gdx.files.internal("point.wav")));
+        putSound("ring", Gdx.audio.newSound(Gdx.files.internal("ring.wav")));
+        putSound("start", Gdx.audio.newSound(Gdx.files.internal("start.wav")));
 
         FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Gdx.files.internal("coders_crux.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -44,6 +53,14 @@ public class Content {
 
     public static TextureAtlas getAtlas(String key) {
         return atlasMap.get(key);
+    }
+
+    public static void putSound(String key, Sound sound) {
+        soundMap.put(key, sound);
+    }
+
+    public static Sound getSound(String key) {
+        return soundMap.get(key);
     }
 
     public static void putFont(String key, BitmapFont font) {

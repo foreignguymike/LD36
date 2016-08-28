@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Vars {
 
+    public static final String TITLE = "The Operator";
+
     public static final int WIDTH = 400;
     public static final int HEIGHT = 300;
     public static final int SCALE = 2;
@@ -57,6 +59,7 @@ public class Vars {
                 sum++;
                 time += CALL_TIMES.get(i).get(j);
             }
+            System.out.println("time:" + time);
         }
         NUM_CALLS = sum;
         TOTAL_TIME = time;
