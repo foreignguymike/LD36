@@ -180,7 +180,11 @@ public class Jack extends GameObject {
         return cord;
     }
 
-    private void clear() {
+    public boolean isFinished() {
+        return callingJack == null;
+    }
+
+    public void clear() {
         talkedTo = false;
         waitingForPickup = false;
         talkingTo = false;

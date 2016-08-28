@@ -17,6 +17,8 @@ public class Person extends GameObject {
     private String areaCode;
     private String formattedAreaCode;
     private String number;
+
+    private Jack originalJack;
     private Jack callingJack;
 
     private int xdest;
@@ -35,6 +37,7 @@ public class Person extends GameObject {
 
     public Person(String areaCode, Jack originalJack, Jack callingJack) {
         this.areaCode = areaCode;
+        this.originalJack = originalJack;
         this.callingJack = callingJack;
         formattedAreaCode = "(" + areaCode + ")";
         number = Manual.formatRandomNumberFromAreaCode(areaCode);
@@ -100,6 +103,11 @@ public class Person extends GameObject {
 
         if (waiting) {
             patienceTime -= dt;
+            if(patienceTime < 0) {
+                remove();
+                originalJack.clear();
+                callingJack.clear();
+            }
         }
 
         if (x < xdest) {

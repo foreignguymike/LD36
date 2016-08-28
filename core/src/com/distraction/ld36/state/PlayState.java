@@ -29,6 +29,7 @@ public class PlayState extends State implements Jack.JackListener {
 
     private float time;
     private float nextTime;
+    private int callCount = 0;
 
     private Switch draggingSwitch;
     private int draggingSwitchy;
@@ -57,6 +58,8 @@ public class PlayState extends State implements Jack.JackListener {
         bg = Content.getAtlas("main").findRegion("bg");
         manualButtonImage = Content.getAtlas("main").findRegion("manual_button");
         font = Content.getFont("bigFont");
+
+        nextTime = getNextTime();
     }
 
     private void initJacks() {
@@ -106,7 +109,7 @@ public class PlayState extends State implements Jack.JackListener {
             }
         }
         if (elements.size() < 2) {
-            nextTime = randomNextTime();
+            nextTime = getNextTime();
             return;
         }
 
@@ -134,8 +137,8 @@ public class PlayState extends State implements Jack.JackListener {
 
     }
 
-    private float randomNextTime() {
-        return (float) (Math.random() * Vars.CALL_RAND + Vars.CALL_MIN_TIME);
+    private float getNextTime() {
+        return Vars.CALL_TIMES[callCount++];
     }
 
     @Override
@@ -159,7 +162,7 @@ public class PlayState extends State implements Jack.JackListener {
         // create a new caller
         if (time >= nextTime) {
             time = 0;
-            nextTime = randomNextTime();
+            nextTime = getNextTime();
             createCaller();
         }
 
@@ -276,7 +279,6 @@ public class PlayState extends State implements Jack.JackListener {
                         jack.setCord(null);
                     }
                     draggingCord.setJack(null);
-                    draggingCord.setDragging(m.x, m.y);
                 }
             }
         }
@@ -292,6 +294,7 @@ public class PlayState extends State implements Jack.JackListener {
 
         if (draggingCord != null) {
 
+            boolean hit = false;
             for (int row = 0; row < jacks.length; row++) {
                 for (int col = 0; col < jacks[row].length; col++) {
                     Jack jack = jacks[row][col];
@@ -307,17 +310,25 @@ public class PlayState extends State implements Jack.JackListener {
                                 if (jack.isCaller()) {
                                     draggingCord.setJack(jack);
                                     jack.setCord(draggingCord);
+                                    hit = true;
+                                    break;
                                 }
                             } else {
                                 Jack matchingJack = matchingCord.getJack();
                                 if (matchingJack.getCallingJack() == jack) {
                                     draggingCord.setJack(jack);
                                     jack.setCord(draggingCord);
+                                    hit = true;
+                                    break;
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            if(!hit) {
+                draggingCord.setToOriginalPosition();
             }
 
             draggingCord.setDraggingFalse();

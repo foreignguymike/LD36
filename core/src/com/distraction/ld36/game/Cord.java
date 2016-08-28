@@ -37,6 +37,7 @@ public class Cord extends GameObject {
     }
 
     public void setDragging(float x, float y) {
+        jack = null;
         dragging = true;
         xdest = (int) x;
         ydest = (int) y;
@@ -53,7 +54,14 @@ public class Cord extends GameObject {
             float dy = jack.gety() - y;
             dist = (float) (Math.sqrt(dx * dx + dy * dy));
             degrees = MathUtils.atan2(dy, dx) * MathUtils.radDeg;
+            xdest = jack.getx();
+            ydest = jack.gety();
         }
+    }
+
+    public void setToOriginalPosition() {
+        xdest = x;
+        ydest = y;
     }
 
     public Jack getJack() {
@@ -62,17 +70,14 @@ public class Cord extends GameObject {
 
     @Override
     public boolean contains(float x, float y) {
-        if (jack != null && jack.canTakeOffCord()) {
-            return x > jack.getx() - jack.getWidth() / 2 &&
-                    x < jack.getx() + jack.getWidth() / 2 &&
-                    y > jack.gety() - jack.getHeight() / 2 &&
-                    y < jack.gety() + jack.getHeight() / 2;
-        } else {
-            return x > this.x - width / 2 &&
-                    x < this.x + width / 2 &&
-                    y > this.y - height / 2 &&
-                    y < this.y + height / 2;
+        boolean inBounds = x > xdest - width / 2 &&
+                    x < xdest + width / 2 &&
+                    y > ydest - height / 2 &&
+                    y < ydest + height / 2;
+        if(inBounds) {
+            return !(jack != null && !jack.isFinished());
         }
+        return false;
     }
 
     public void render(SpriteBatch sb) {
@@ -93,14 +98,7 @@ public class Cord extends GameObject {
                     1,
                     degrees);
         }
-
-        if (dragging) {
-            sb.draw(cordImage, xdest - cordImage.getRegionWidth() / 2, ydest - cordImage.getRegionHeight() / 2);
-        } else if (jack != null) {
-            sb.draw(cordImage, jack.getx() - cordImage.getRegionWidth() / 2, jack.gety() - cordImage.getRegionHeight() / 2);
-        } else {
-            sb.draw(cordImage, x - cordImage.getRegionWidth() / 2, y - cordImage.getRegionHeight() / 2);
-        }
+        sb.draw(cordImage, xdest - cordImage.getRegionWidth() / 2, ydest - cordImage.getRegionHeight() / 2);
     }
 
 }
