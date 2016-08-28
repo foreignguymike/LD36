@@ -11,30 +11,18 @@ public class Vars {
 
     public static final int PANEL_WIDTH = WIDTH - 100;
 
-    public static final float CALL_MIN_TIME = 15;
-    public static final float CALL_RAND = 5;
-    public static final float CALL_MAX_TIME = CALL_MIN_TIME + CALL_RAND;
+    public static final float CALL_MAX_TIME = 5;
 
-    public static final float PICKUP_MIN_TIME = 3;
-    public static final float PICKUP_RAND = 8;
-    public static final float PICKUP_MAX_TIME = PICKUP_MIN_TIME + PICKUP_RAND;
-
-    public static final float PATIENCE_MIN_TIME = PICKUP_MAX_TIME + 20;
-    public static final float PATIENCE_RAND = 20;
+    public static final float PATIENCE_MIN_TIME = 18;
+    public static final float PATIENCE_RAND = 10;
     public static final float PATIENCE_MAX_TIME = PATIENCE_MIN_TIME + PATIENCE_RAND;
 
-    public static final float CALLING_OPERATOR_TIME = 10;
-
-
+    public static final int RUSH = 10;
+    public static final int BULLET = 10;
     public static final float[] CALL_TIMES =
             {
                     // start
-
-                    2.5f,
-                    20,
-                    19,
-                    18,
-                    18,
+                    2.5f, 0.3f, 8, 7, 7, 0.2f, 7, 7, 7,
 
                     // rush
 

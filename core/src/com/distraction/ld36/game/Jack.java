@@ -6,47 +6,25 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.distraction.ld36.Content;
-import com.distraction.ld36.Vars;
 
 public class Jack extends GameObject {
 
     public interface JackListener {
-        void onTalk(Person person);
-
         void finish();
     }
 
-    private Person caller;
     private String id;
     private JackListener jackListener;
 
-    private boolean lit;
     private Cord cord;
-    private Jack callingJack;
+    private Jack otherJack;
 
-    private float baseTime;
-    private float callOperatorTime;
-    private float pickupTime;
-    private float pickupTimer;
-    private float talkTime;
-    private float talkTimer;
-
-    private boolean talkingTo;
-    private boolean ringing;
-    private boolean pickedUp;
-    private boolean linked;
-    private boolean talking;
-
-    private boolean talkedTo;
-    private boolean waitingForPickup;
-    private boolean conversing;
+    private boolean finished;
 
     private TextureRegion jackImage;
-    private TextureRegion redLightImage;
     private TextureRegion greenLightImage;
     private TextureRegion yellowLightImage;
     private TextureRegion offLightImage;
-    private TextureRegion pixel;
 
     private BitmapFont font;
     private float fontWidth;
@@ -58,11 +36,9 @@ public class Jack extends GameObject {
         this.jackListener = jackListener;
 
         jackImage = Content.getAtlas("main").findRegion("jack");
-        redLightImage = Content.getAtlas("main").findRegion("jack_light_red");
         greenLightImage = Content.getAtlas("main").findRegion("jack_light_green");
         yellowLightImage = Content.getAtlas("main").findRegion("jack_light_yellow");
         offLightImage = Content.getAtlas("main").findRegion("jack_light_off");
-        pixel = Content.getAtlas("main").findRegion("pixel");
 
         width = jackImage.getRegionWidth();
         height = jackImage.getRegionHeight();
@@ -73,133 +49,16 @@ public class Jack extends GameObject {
         fontWidth = glyph.width;
     }
 
-    public boolean isAvailable() {
-        return !lit && callingJack == null && cord == null;
-    }
-
-    public boolean canTakeOffCord() {
-        return !lit && callingJack == null;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void talk() {
-        linked = false;
-        if (conversing) {
-            talking = false;
-            callingJack.setTalking(false);
-            return;
-        }
-        if (caller == null) {
-            return;
-        }
-        talkedTo = true;
-        jackListener.onTalk(caller);
-        ringing = false;
-        talkingTo = true;
+    public boolean isAvailable() {
+        return cord == null && otherJack == null;
     }
 
-    public void link() {
-        if (ringing) {
-            ringing = false;
-            if (caller == null) {
-                return;
-            }
-        }
-        if (caller == null && !pickedUp) {
-            return;
-        }
-        if ((callingJack == null || ringing) && caller == null) {
-            return;
-        }
-        if (caller != null && !talkedTo) {
-            return;
-        }
-        linked = true;
-        if (conversing) {
-            if(callingJack.isLinked()) {
-                talking = true;
-                callingJack.setTalking(true);
-            }
-            return;
-        }
-        if (callingJack.isLinked()) {
-            setTalkTimer((float) (Math.random() * 15 + 5));
-            callingJack.setTalkTimer(talkTimer);
-            setTalking(true);
-            callingJack.setTalking(true);
-            setConversing(true);
-            callingJack.setConversing(true);
-        }
-    }
-
-    public void ring() {
-        linked = false;
-        if (conversing) {
-            talking = false;
-            callingJack.setTalking(false);
-            return;
-        }
-        if (pickedUp) {
-            return;
-        }
-        if (callingJack != null && caller == null) {
-            ringing = true;
-            if (!waitingForPickup) {
-                waitingForPickup = true;
-                pickupTimer = (float) (Math.random() * Vars.PICKUP_RAND + Vars.PICKUP_MIN_TIME);
-            }
-        }
-    }
-
-    public void setCaller(Person caller) {
-        if (caller == null) {
-            lit = false;
-            callingJack.setCallingJack(null);
-        } else {
-            lit = true;
-            talkedTo = false;
-            setCallingJack(caller.getCallingJack());
-            callingJack.setCallingJack(this);
-        }
-        this.caller = caller;
-    }
-
-    public void setCallingJack(Jack callingJack) {
-        this.callingJack = callingJack;
-    }
-
-    public void setCord(Cord cord) {
-        this.cord = cord;
-    }
-
-    public void setTalking(boolean talking) {
-        this.talking = talking;
-        if (caller != null && talking) {
-            caller.stopWaiting();
-        }
-    }
-
-    public void setConversing(boolean conversing) {
-        this.conversing = conversing;
-    }
-
-    public void setTalkTimer(float talkTimer) {
-        this.talkTimer = talkTimer;
-    }
-
-    public boolean isLinked() {
-        return linked;
-    }
-
-    public boolean isCaller() {
-        return caller != null;
-    }
-
-    public Jack getCallingJack() {
-        return callingJack;
+    public Jack getOtherJack() {
+        return otherJack;
     }
 
     public Cord getCord() {
@@ -207,98 +66,54 @@ public class Jack extends GameObject {
     }
 
     public boolean isFinished() {
-        return callingJack == null;
+        return otherJack == null;
+    }
+
+    public void setCord(Cord cord) {
+        this.cord = cord;
+    }
+
+    public void setOtherJack(Jack otherJack) {
+        this.otherJack = otherJack;
     }
 
     public void clear() {
-        talkedTo = false;
-        conversing = false;
-        waitingForPickup = false;
-        talkingTo = false;
-        lit = false;
-        caller = null;
-        callingJack = null;
-        pickupTime = 0;
-        talkTime = 0;
-        ringing = false;
-        pickedUp = false;
-        linked = false;
-        talking = false;
+        otherJack = null;
+
+        if (cord != null) {
+            cord.setToOriginalPosition();
+            cord.setJack(null);
+            cord = null;
+        }
     }
 
     public void update(float dt) {
-        baseTime += dt;
 
-        if (caller != null && !talkedTo) {
-            callOperatorTime += dt;
-            if (callOperatorTime > Vars.CALLING_OPERATOR_TIME) {
-                clear();
-            }
+        if (otherJack == null) {
+            return;
         }
 
-        if (ringing) {
-            pickupTime += dt;
-            if (pickupTime >= pickupTimer) {
-                ringing = false;
-                pickedUp = true;
-                waitingForPickup = false;
-            }
+        if (!finished && cord != null && otherJack.getCord() != null) {
+            finished = true;
+            jackListener.finish();
         }
 
-        if (talking) {
-            talkTime += dt;
-            if (talkTime >= talkTimer) {
-                if (caller != null) {
-                    jackListener.finish();
-                }
-                if (caller != null) {
-                    caller.remove();
-                }
-                caller = null;
-                clear();
-            }
-        }
     }
 
     public void render(SpriteBatch sb) {
         sb.setColor(Color.WHITE);
         sb.draw(jackImage, x - width / 2, y - height / 2);
-        if (talking) {
-            sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
-        } else if (caller != null && !talkedTo) {
-            if (baseTime % 0.1f < 0.05f) {
+
+        if (cord != null) {
+            if (otherJack.getCord() != null) {
                 sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
             } else {
-                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
-            }
-        } else if (linked && !talking) {
-            sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
-        } else if ((lit && talkingTo) || (caller == null && pickedUp && !linked)) {
-            if (baseTime % 0.6f < 0.3f) {
                 sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
-            } else {
-                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
-            }
-        } else if (ringing) {
-            if (pickupTime % 0.1f < 0.05f) {
-                sb.draw(redLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
-            } else {
-                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
             }
         } else {
-            sb.draw(offLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
+            sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
         }
 
-        if (waitingForPickup) {
-            sb.setColor(Color.GREEN);
-            sb.draw(pixel, x - width / 2, y + 12, width * (pickupTimer - pickupTime) / Vars.PICKUP_MAX_TIME, 2);
-        } else if (conversing) {
-            sb.setColor(Color.GREEN);
-            sb.draw(pixel, x - width / 2, y + 12, width * (talkTimer - talkTime) / Vars.CALL_MAX_TIME, 2);
-        } else if (caller != null && !talkedTo) {
-            sb.setColor(Color.GREEN);
-            sb.draw(pixel, x - width / 2, y + 12, width * (Vars.CALLING_OPERATOR_TIME - callOperatorTime) / Vars.CALLING_OPERATOR_TIME, 2);
-        }
         font.setColor(Color.WHITE);
         font.draw(sb, id, x - fontWidth / 2, y - height / 2 - 2);
     }
