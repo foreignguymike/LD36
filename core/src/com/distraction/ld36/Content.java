@@ -27,10 +27,14 @@ public class Content {
         params.size = 16;
         params.minFilter = Texture.TextureFilter.Nearest;
         params.magFilter = Texture.TextureFilter.Nearest;
-        params.characters = "0123456789()->MANUAL ";
+        params.characters = "0123456789()->MANUALSTARTRUSHBULLETFINISH!FinalScore: ";
         putFont("mainFont", gen.generateFont(params));
         params.size = 32;
         putFont("bigFont", gen.generateFont(params));
+        params.size = 128;
+        params.borderColor = Color.BLACK;
+        params.color = Color.WHITE;
+        putFont("scrollingFont", gen.generateFont(params));
         gen.dispose();
     }
 

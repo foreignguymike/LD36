@@ -15,23 +15,15 @@ public class LD36 extends ApplicationAdapter {
 
     @Override
     public void create() {
-
-        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-
         sb = new SpriteBatch();
 
         gsm = new GSM();
         gsm.pushState(new PlayState(gsm));
-
     }
 
     @Override
     public void render() {
-
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         gsm.update(Gdx.graphics.getDeltaTime());
         gsm.render(sb);
-
     }
 }

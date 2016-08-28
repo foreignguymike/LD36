@@ -26,36 +26,31 @@ public class Vars {
     public static final float CALLING_OPERATOR_TIME = 10;
 
 
-    public static final int[] CALL_TIMES =
+    public static final float[] CALL_TIMES =
             {
                     // start
 
-                    1,
+                    2.5f,
                     20,
                     19,
                     18,
                     18,
 
-                    // rush it
+                    // rush
 
+                    14,
+                    14,
+                    14,
                     13,
                     13,
-                    12,
-                    12,
-                    11,
-                    11,
-                    10,
-                    10,
+                    13,
 
-                    // finish
+                    // bullet
 
-                    3,
-                    3,
-                    3,
-                    2,
-                    2,
-                    1,
-                    1
+                    9,
+                    8,
+                    8,
+                    7
             };
 
 }

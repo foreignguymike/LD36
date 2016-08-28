@@ -10,7 +10,7 @@ bg
   orig: 300, 300
   offset: 0, 0
   index: -1
-manual_button
+button_bg
   rotate: false
   xy: 1, 52
   size: 100, 30

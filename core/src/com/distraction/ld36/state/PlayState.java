@@ -2,16 +2,18 @@ package com.distraction.ld36.state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.distraction.ld36.Content;
 import com.distraction.ld36.Vars;
+import com.distraction.ld36.game.Button;
 import com.distraction.ld36.game.Cord;
 import com.distraction.ld36.game.Jack;
 import com.distraction.ld36.game.Manual;
 import com.distraction.ld36.game.Person;
+import com.distraction.ld36.game.ScrollingText;
 import com.distraction.ld36.game.Switch;
 
 import java.util.ArrayList;
@@ -39,13 +41,15 @@ public class PlayState extends State implements Jack.JackListener {
     private int draggingCordCol;
 
     private TextureRegion bg;
-    private TextureRegion manualButtonImage;
     private BitmapFont font;
-    private String manualString = "MANUAL";
-    private Rectangle manualRect = new Rectangle(Vars.PANEL_WIDTH, Vars.HEIGHT - 30, Vars.WIDTH - Vars.PANEL_WIDTH, 30);
+
+    private Button manualButton;
+    private Button finishButton;
 
     private int points;
     private boolean done;
+
+    private ScrollingText scrollingText;
 
     public PlayState(GSM gsm) {
         super(gsm);
@@ -59,10 +63,13 @@ public class PlayState extends State implements Jack.JackListener {
         callers = new ArrayList<Person>();
 
         bg = Content.getAtlas("main").findRegion("bg");
-        manualButtonImage = Content.getAtlas("main").findRegion("manual_button");
         font = Content.getFont("bigFont");
 
         nextTime = getNextTime();
+
+        scrollingText = new ScrollingText("START");
+
+        manualButton = new Button("MANUAL", Vars.HEIGHT - 15);
     }
 
     private void initJacks() {
@@ -103,8 +110,15 @@ public class PlayState extends State implements Jack.JackListener {
 
     private float getNextTime() {
         if (callCount == Vars.CALL_TIMES.length) {
+            scrollingText = new ScrollingText("FINISHED!");
+            finishButton = new Button("FINISH", Vars.HEIGHT - 45);
             done = true;
             return -1;
+        }
+        if (callCount == 5) {
+            scrollingText = new ScrollingText("RUSH!");
+        } else if (callCount == 10) {
+            scrollingText = new ScrollingText("BULLET!");
         }
         return Vars.CALL_TIMES[callCount++];
     }
@@ -197,10 +211,21 @@ public class PlayState extends State implements Jack.JackListener {
             }
         }
 
+        if (scrollingText != null) {
+            scrollingText.update(dt);
+            if (scrollingText.getx() < -scrollingText.getWidth()) {
+                scrollingText = null;
+            }
+        }
+
     }
 
     @Override
     public void render(SpriteBatch sb) {
+
+        Gdx.gl.glClearColor(0.4f, 0.2f, 0.2f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         sb.begin();
         sb.setProjectionMatrix(cam.combined);
 
@@ -229,11 +254,14 @@ public class PlayState extends State implements Jack.JackListener {
             caller.render(sb);
         }
 
-        sb.setColor(Color.WHITE);
-        sb.draw(manualButtonImage, Vars.PANEL_WIDTH, Vars.HEIGHT - manualButtonImage.getRegionHeight());
+        manualButton.render(sb);
+        if (finishButton != null) {
+            finishButton.render(sb);
+        }
 
-        font.setColor(Color.BLACK);
-        font.draw(sb, manualString, Vars.PANEL_WIDTH + 17, Vars.HEIGHT - 8);
+        if (scrollingText != null) {
+            scrollingText.render(sb);
+        }
 
         sb.end();
     }
@@ -257,9 +285,13 @@ public class PlayState extends State implements Jack.JackListener {
         m.y = y;
         unproject();
 
-        if (manualRect.contains(m.x, m.y)) {
+        if (manualButton.contains(m.x, m.y)) {
             gsm.setUpdateDepth(2);
             gsm.pushState(new ManualState(gsm, manual));
+        }
+
+        if (finishButton != null && finishButton.contains(m.x, m.y)) {
+            gsm.setState(new FinishState(gsm, points));
         }
 
         for (Jack[] jackArray : jacks) {
