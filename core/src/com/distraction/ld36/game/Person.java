@@ -10,6 +10,7 @@ public class Person extends GameObject {
 
     private TextureRegion image;
 
+    private String areaCode;
     private String number;
     private Jack callingJack;
 
@@ -19,9 +20,10 @@ public class Person extends GameObject {
 
     private boolean cleared;
 
-    public Person(String number, Jack callingJack) {
-        this.number = number;
+    public Person(String areaCode, Jack callingJack) {
+        this.areaCode = areaCode;
         this.callingJack = callingJack;
+        number = Manual.formatRandomNumberFromAreaCode(areaCode);
         width = Vars.WIDTH - Vars.PANEL_WIDTH;
         height = Vars.CALLER_HEIGHT;
         x = Vars.PANEL_WIDTH + width / 2;
@@ -30,6 +32,14 @@ public class Person extends GameObject {
         ydest = y;
 
         image = new TextureRegion(Content.getTexture("test"));
+    }
+
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public String getNumber() {
+        return number;
     }
 
     public Jack getCallingJack() {
@@ -82,7 +92,7 @@ public class Person extends GameObject {
                 y = ydest;
             }
         }
-        if(x > Vars.WIDTH + width / 2) {
+        if (x > Vars.WIDTH + width / 2) {
             cleared = true;
         }
     }

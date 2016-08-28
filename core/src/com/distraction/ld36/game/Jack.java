@@ -2,9 +2,11 @@ package com.distraction.ld36.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.distraction.ld36.Content;
+import com.distraction.ld36.Vars;
 
 public class Jack extends GameObject {
 
@@ -13,40 +15,53 @@ public class Jack extends GameObject {
     }
 
     private Person caller;
-    private int id;
+    private String id;
     private JackListener jackListener;
-
-    private TextureRegion image;
 
     private boolean lit;
     private Cord cord;
     private Jack callingJack;
 
+    private float baseTime;
     private float pickupTime;
     private float pickupTimer;
-
     private float talkTime;
     private float talkTimer;
 
+    private boolean talkingTo;
     private boolean ringing;
     private boolean pickedUp;
     private boolean linked;
     private boolean talking;
 
+    private TextureRegion jackImage;
+    private TextureRegion redLightImage;
+    private TextureRegion greenLightImage;
+    private TextureRegion yellowLightImage;
+    private TextureRegion offLightImage;
+
     private BitmapFont font;
+    private float fontWidth;
 
     public Jack(int x, int y, int id, JackListener jackListener) {
         this.x = x;
         this.y = y;
-        this.id = id;
+        this.id = String.valueOf(id);
         this.jackListener = jackListener;
 
-        image = new TextureRegion(Content.getTexture("test"));
-        width = image.getRegionWidth();
-        height = image.getRegionHeight();
+        jackImage = Content.getAtlas("main").findRegion("jack");
+        redLightImage = Content.getAtlas("main").findRegion("jack_light_red");
+        greenLightImage = Content.getAtlas("main").findRegion("jack_light_green");
+        yellowLightImage = Content.getAtlas("main").findRegion("jack_light_yellow");
+        offLightImage = Content.getAtlas("main").findRegion("jack_light_off");
 
-        font = new BitmapFont();
-        font.setColor(Color.BLACK);
+        width = jackImage.getRegionWidth();
+        height = jackImage.getRegionHeight();
+
+        font = Content.getFont("12");
+        GlyphLayout glyph = new GlyphLayout();
+        glyph.setText(font, String.valueOf(this.id));
+        fontWidth = glyph.width;
     }
 
     public boolean isAvailable() {
@@ -59,15 +74,26 @@ public class Jack extends GameObject {
         }
         jackListener.onTalk(caller);
         ringing = false;
+        linked = false;
+        talkingTo = true;
     }
 
     public void link() {
+        if (ringing) {
+            ringing = false;
+            if (caller == null) {
+                return;
+            }
+        }
+        if (caller == null && !pickedUp) {
+            return;
+        }
         if ((callingJack == null || ringing) && caller == null) {
             return;
         }
         linked = true;
         if (callingJack.isLinked()) {
-            setTalkTimer((float) (Math.random() * 6 + 2));
+            setTalkTimer((float) (Math.random() * 15 + 5));
             callingJack.setTalkTimer(talkTimer);
             setTalking(true);
             callingJack.setTalking(true);
@@ -75,12 +101,13 @@ public class Jack extends GameObject {
     }
 
     public void ring() {
+        linked = false;
         if (pickedUp) {
             return;
         }
         if (callingJack != null) {
             ringing = true;
-            pickupTimer = (float) (Math.random() * 2 + 2);
+            pickupTimer = (float) (Math.random() * Vars.PICKUP_RAND + Vars.PICKUP_MIN_TIME);
         }
     }
 
@@ -129,6 +156,7 @@ public class Jack extends GameObject {
     }
 
     public void update(float dt) {
+        baseTime += dt;
         if (ringing) {
             pickupTime += dt;
             if (pickupTime >= pickupTimer) {
@@ -149,8 +177,8 @@ public class Jack extends GameObject {
     }
 
     private void clear() {
+        talkingTo = false;
         lit = false;
-        cord = null;
         callingJack = null;
         pickupTime = 0;
         talkTime = 0;
@@ -161,22 +189,35 @@ public class Jack extends GameObject {
     }
 
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.BLACK);
-        sb.draw(image, x - width / 2, y - height / 2);
+        sb.setColor(Color.WHITE);
+        sb.draw(jackImage, x - width / 2, y - height / 2);
         if (talking) {
-            sb.setColor(Color.RED);
-        } else if (lit) {
-            sb.setColor(Color.GREEN);
+            sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
+        } else if (caller != null && lit && !talkingTo) {
+            if (baseTime % 0.1f < 0.05f) {
+                sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
+            } else {
+                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
+            }
+        } else if (linked && !talking) {
+            sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
+        } else if ((lit && talkingTo) || (caller == null && pickedUp)) {
+            if (baseTime % 0.6f < 0.3f) {
+                sb.draw(yellowLightImage, x - yellowLightImage.getRegionWidth() / 2, y + 12);
+            } else {
+                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
+            }
         } else if (ringing) {
-            sb.setColor(Color.YELLOW);
-        } else if (pickedUp) {
-            sb.setColor(Color.CORAL);
-        } else if (callingJack != null) {
-            sb.setColor(Color.ORANGE);
+            if (pickupTime % 0.1f < 0.05f) {
+                sb.draw(redLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
+            } else {
+                sb.draw(offLightImage, x - offLightImage.getRegionWidth() / 2, y + 12);
+            }
+        } else {
+            sb.draw(offLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
         }
-        sb.draw(image, x - width / 2 + 5, y - height / 2 + 20);
         sb.setColor(Color.BLACK);
-        font.draw(sb, "" + id, x - width / 2 - 5, y - height / 2 + 30);
+        font.draw(sb, "" + id, x - fontWidth / 2, y - height / 2 - 2);
     }
 
 }

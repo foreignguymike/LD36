@@ -50,6 +50,17 @@ public class Manual {
         return "(" + areaCode + ") 555-" + String.valueOf((int) (Math.random() * 9000 + 1000));
     }
 
+    public int getJackIdentifierFromAreaCode(String areaCode) {
+        for (int row = 0; row < areaCodes.length; row++) {
+            for (int col = 0; col < areaCodes[0].length; col++) {
+                if (areaCodes[row][col].equals(areaCode)) {
+                    return row * areaCodes[0].length + col;
+                }
+            }
+        }
+        return -1;
+    }
+
     public static class Element {
         private int row;
         private int col;

@@ -1,7 +1,10 @@
 package com.distraction.ld36.state;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.distraction.ld36.Content;
 import com.distraction.ld36.Vars;
 import com.distraction.ld36.game.Cord;
 import com.distraction.ld36.game.Jack;
@@ -32,6 +35,8 @@ public class PlayState extends State implements Jack.JackListener {
     private int draggingCordRow;
     private int draggingCordCol;
 
+    private TextureRegion bg;
+
     public PlayState(GSM gsm) {
         super(gsm);
 
@@ -42,6 +47,8 @@ public class PlayState extends State implements Jack.JackListener {
         initSwitches();
 
         callers = new ArrayList<Person>();
+
+        bg = Content.getAtlas("main").findRegion("bg");
 
         Gdx.input.setInputProcessor(this);
     }
@@ -54,7 +61,7 @@ public class PlayState extends State implements Jack.JackListener {
             for (int col = 0; col < jacks[0].length; col++) {
                 jacks[row][col] = new Jack(
                         col * width + width / 2,
-                        Vars.HEIGHT - (row * height + height / 2),
+                        Vars.HEIGHT - (row * height + height / 2) - 10,
                         row * jacks[0].length + col,
                         this);
             }
@@ -67,7 +74,7 @@ public class PlayState extends State implements Jack.JackListener {
         int width = Vars.PANEL_WIDTH / switches[0].length;
         for (int row = 0; row < switches.length; row++) {
             for (int col = 0; col < switches[0].length; col++) {
-                switches[row][col] = new Switch(col * width + width / 2 - 10, Vars.HEIGHT / 2 / 2 + 20 - row * 40, cords[row][col]);
+                switches[row][col] = new Switch(col * width + width / 2 - 11, Vars.HEIGHT / 5 + 25 - row * 50, cords[row][col]);
             }
         }
     }
@@ -77,14 +84,36 @@ public class PlayState extends State implements Jack.JackListener {
         int width = Vars.PANEL_WIDTH / cords[0].length;
         for (int row = 0; row < cords.length; row++) {
             for (int col = 0; col < cords[0].length; col++) {
-                cords[row][col] = new Cord(col * width + width / 2 + 10, Vars.HEIGHT / 2 / 2 + 20 - row * 40);
+                cords[row][col] = new Cord(col * width + width / 2 + 11, Vars.HEIGHT / 5 + 25 - row * 50);
             }
         }
     }
 
     private void createCaller() {
 
+        boolean enough = false;
+        int numAvailable = 0;
+        for (int row = 0; row < jacks.length; row++) {
+            for (int col = 0; col < jacks[0].length; col++) {
+                if (jacks[row][col].isAvailable()) {
+                    numAvailable++;
+                    if (numAvailable >= 2) {
+                        enough = true;
+                        break;
+                    }
+                }
+            }
+            if (enough) {
+                break;
+            }
+        }
+        if(!enough) {
+            nextTime = randomNextTime();
+            return;
+        }
+
         do {
+
             int row = (int) (Math.random() * jacks.length);
             int col = (int) (Math.random() * jacks[0].length);
 
@@ -100,14 +129,10 @@ public class PlayState extends State implements Jack.JackListener {
                     }
 
                     if (jacks[row2][col2].isAvailable()) {
-
                         String areaCode = manual.getAreaCode(row2, col2);
-                        String number = Manual.formatRandomNumberFromAreaCode(areaCode);
-
                         Manual.Element element = manual.getCoordinatesFromAreaCode(areaCode);
-                        Person caller = new Person(number, jacks[element.getRow()][element.getCol()]);
+                        Person caller = new Person(areaCode, jacks[element.getRow()][element.getCol()]);
                         jacks[row][col].setCaller(caller);
-
                         break;
                     }
 
@@ -127,6 +152,7 @@ public class PlayState extends State implements Jack.JackListener {
     public void onTalk(Person caller) {
         if (!callers.contains(caller)) {
             callers.add(caller);
+            System.out.println("jack id: " + manual.getJackIdentifierFromAreaCode(caller.getAreaCode()));
         }
     }
 
@@ -157,7 +183,7 @@ public class PlayState extends State implements Jack.JackListener {
         for (int i = callers.size() - 1; i >= 0; i--) {
             Person caller = callers.get(i);
             caller.update(dt);
-            if(caller.isCleared()) {
+            if (caller.isCleared()) {
                 callers.remove(i);
             }
         }
@@ -168,6 +194,9 @@ public class PlayState extends State implements Jack.JackListener {
     public void render(SpriteBatch sb) {
         sb.begin();
         sb.setProjectionMatrix(cam.combined);
+
+        sb.setColor(Color.WHITE);
+        sb.draw(bg, 0, 0);
 
         for (Jack[] jackArray : jacks) {
             for (Jack jack : jackArray) {
@@ -263,25 +292,20 @@ public class PlayState extends State implements Jack.JackListener {
                     Jack jack = jacks[row][col];
                     if (jack.contains(m.x, m.y)) {
                         if (jack.getCord() == null) {
-                            System.out.println("jack has no cord");
                             Cord matchingCord;
                             if (draggingCordRow == 0) {
-                                System.out.println("cord on first row, col: " + draggingCordCol);
                                 matchingCord = cords[1][draggingCordCol];
                             } else {
-                                System.out.println("cord on second row, col: " + draggingCordCol);
                                 matchingCord = cords[0][draggingCordCol];
                             }
-                            if(matchingCord.getJack() == null) {
-                                System.out.println("has no connected matching cord");
-                                if(jack.isCaller()) {
+                            if (matchingCord.getJack() == null) {
+                                if (jack.isCaller()) {
                                     draggingCord.setJack(jack);
                                     jack.setCord(draggingCord);
                                 }
                             } else {
-                                System.out.println("has existing connected matching cord");
                                 Jack matchingJack = matchingCord.getJack();
-                                if(matchingJack.getCallingJack() == jack) {
+                                if (matchingJack.getCallingJack() == jack) {
                                     draggingCord.setJack(jack);
                                     jack.setCord(draggingCord);
                                 }

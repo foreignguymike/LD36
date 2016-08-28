@@ -8,9 +8,9 @@ import com.distraction.ld36.Content;
 public class Switch extends GameObject {
 
     private enum Position {
-        FRONT(20),
+        FRONT(11),
         MIDDLE(0),
-        BACK(-20);
+        BACK(-11);
 
         private int value;
 
@@ -26,7 +26,8 @@ public class Switch extends GameObject {
     private Position position;
     private Cord cord;
 
-    private TextureRegion image;
+    private TextureRegion bg;
+    private TextureRegion switchImage;
 
     public Switch(int x, int y, Cord cord) {
         this.x = x;
@@ -34,9 +35,10 @@ public class Switch extends GameObject {
         this.cord = cord;
         position = Position.MIDDLE;
 
-        image = new TextureRegion(Content.getTexture("test"));
-        width = image.getRegionWidth();
-        height = image.getRegionHeight();
+        bg = Content.getAtlas("main").findRegion("switch_bg");
+        switchImage = Content.getAtlas("main").findRegion("switch");
+        width = switchImage.getRegionWidth();
+        height = switchImage.getRegionHeight();
     }
 
     public void flipUp() {
@@ -72,17 +74,16 @@ public class Switch extends GameObject {
 
     @Override
     public boolean contains(float x, float y) {
-        return x > this.x - width / 4 &&
-                x < this.x + width / 4 &&
-                y > this.y - height / 4 + position.getValue() &&
-                y < this.y + height / 4 + position.getValue();
+        return x > this.x - width / 2 &&
+                x < this.x + width / 2 &&
+                y > this.y - height / 2 + position.getValue() &&
+                y < this.y + height / 2 + position.getValue();
     }
 
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.YELLOW);
-        sb.draw(image, x - width / 2, y - height / 2);
-        sb.setColor(Color.BLACK);
-        sb.draw(image, x - width / 4, y - height / 4 + position.getValue(), width / 2, height / 2);
+        sb.setColor(Color.WHITE);
+        sb.draw(bg, x - width / 2, y - bg.getRegionHeight() / 2);
+        sb.draw(switchImage, x - width / 2, y - height / 2 + position.getValue());
     }
 
 }
