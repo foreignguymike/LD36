@@ -97,58 +97,39 @@ public class PlayState extends State implements Jack.JackListener {
 
     private void createCaller() {
 
-        System.out.println("creating caller");
-
-        boolean enough = false;
-        int numAvailable = 0;
+        List<Manual.Element> elements = new ArrayList<Manual.Element>();
         for (int row = 0; row < jacks.length; row++) {
             for (int col = 0; col < jacks[0].length; col++) {
                 if (jacks[row][col].isAvailable()) {
-                    numAvailable++;
-                    if (numAvailable >= 2) {
-                        enough = true;
-                        break;
-                    }
+                    elements.add(new Manual.Element(row, col));
                 }
             }
-            if (enough) {
-                break;
-            }
         }
-        if (!enough) {
+        if (elements.size() < 2) {
             nextTime = randomNextTime();
             return;
         }
 
+        int rand1 = (int) (Math.random() * elements.size());
+
         do {
+            int rand2 = (int) (Math.random() * elements.size());
 
-            int row = (int) (Math.random() * jacks.length);
-            int col = (int) (Math.random() * jacks[0].length);
-
-            if (jacks[row][col].isAvailable()) {
-
-                do {
-
-                    int row2 = (int) (Math.random() * jacks.length);
-                    int col2 = (int) (Math.random() * jacks[0].length);
-
-                    if (row == row2 && col == col2) {
-                        continue;
-                    }
-
-                    if (jacks[row2][col2].isAvailable()) {
-                        String areaCode = manual.getAreaCode(row2, col2);
-                        Manual.Element element = manual.getCoordinatesFromAreaCode(areaCode);
-                        Person caller = new Person(areaCode, jacks[row][col], jacks[element.getRow()][element.getCol()]);
-                        jacks[row][col].setCaller(caller);
-                        System.out.println("created caller: " + row + ", " + col);
-                        break;
-                    }
-
-                } while (true);
-
-                break;
+            if (rand1 == rand2) {
+                continue;
             }
+
+            int row = elements.get(rand1).getRow();
+            int col = elements.get(rand1).getCol();
+            int row2 = elements.get(rand2).getRow();
+            int col2 = elements.get(rand2).getCol();
+
+            String areaCode = manual.getAreaCode(row2, col2);
+            Manual.Element element = manual.getCoordinatesFromAreaCode(areaCode);
+            Person caller = new Person(areaCode, jacks[row][col], jacks[element.getRow()][element.getCol()]);
+            jacks[row][col].setCaller(caller);
+            break;
+
         } while (true);
 
     }

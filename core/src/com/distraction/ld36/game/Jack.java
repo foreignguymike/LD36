@@ -36,6 +36,7 @@ public class Jack extends GameObject {
     private boolean talking;
 
     private boolean talkedTo;
+    private boolean waitingForPickup;
 
     private TextureRegion jackImage;
     private TextureRegion redLightImage;
@@ -70,6 +71,10 @@ public class Jack extends GameObject {
     }
 
     public boolean isAvailable() {
+        return !lit && callingJack == null && cord == null;
+    }
+
+    public boolean canTakeOffCord() {
         return !lit && callingJack == null;
     }
 
@@ -120,7 +125,10 @@ public class Jack extends GameObject {
         }
         if (callingJack != null && caller == null) {
             ringing = true;
-            pickupTimer = (float) (Math.random() * Vars.PICKUP_RAND + Vars.PICKUP_MIN_TIME);
+            if (!waitingForPickup) {
+                waitingForPickup = true;
+                pickupTimer = (float) (Math.random() * Vars.PICKUP_RAND + Vars.PICKUP_MIN_TIME);
+            }
         }
     }
 
@@ -147,6 +155,9 @@ public class Jack extends GameObject {
 
     public void setTalking(boolean talking) {
         this.talking = talking;
+        if (caller != null && talking) {
+            caller.stopWaiting();
+        }
     }
 
     public void setTalkTimer(float talkTimer) {
@@ -170,8 +181,8 @@ public class Jack extends GameObject {
     }
 
     private void clear() {
-        System.out.println("cleared");
         talkedTo = false;
+        waitingForPickup = false;
         talkingTo = false;
         lit = false;
         caller = null;
@@ -205,7 +216,6 @@ public class Jack extends GameObject {
         if (talking) {
             talkTime += dt;
             if (talkTime >= talkTimer) {
-                System.out.println("finished");
                 if (caller != null) {
                     caller.remove();
                 }
@@ -243,7 +253,7 @@ public class Jack extends GameObject {
         } else {
             sb.draw(offLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
         }
-        if (ringing) {
+        if (waitingForPickup) {
             sb.setColor(Color.GREEN);
             sb.draw(pixel, x - width / 2, y + 12, width * (pickupTimer - pickupTime) / Vars.PICKUP_MAX_TIME, 2);
         }

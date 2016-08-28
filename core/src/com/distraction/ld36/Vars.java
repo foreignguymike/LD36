@@ -19,6 +19,10 @@ public class Vars {
     public static final float PICKUP_RAND = 8;
     public static final float PICKUP_MAX_TIME = PICKUP_MIN_TIME + PICKUP_RAND;
 
+    public static final float PATIENCE_MIN_TIME = PICKUP_MAX_TIME + 20;
+    public static final float PATIENCE_RAND = 20;
+    public static final float PATIENCE_MAX_TIME = PATIENCE_MIN_TIME + PATIENCE_RAND;
+
     public static final float CALLING_OPERATOR_TIME = 10;
 
 }

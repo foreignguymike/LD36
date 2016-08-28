@@ -11,6 +11,7 @@ import com.distraction.ld36.Vars;
 public class Person extends GameObject {
 
     private TextureRegion image;
+    private TextureRegion pixel;
 
     private String id;
     private String areaCode;
@@ -28,7 +29,9 @@ public class Person extends GameObject {
     private float idWidth;
     private float numberWidth;
 
-    private float patienceTime = (float) (Math.random() * 10 + 20);
+    private boolean waiting = true;
+    private float patienceTime = (float) (Math.random() * Vars.PATIENCE_RAND + Vars.PATIENCE_MIN_TIME);
+    private Color patienceColor = new Color(0.1f, 0.8f, 0.1f, 0.4f);
 
     public Person(String areaCode, Jack originalJack, Jack callingJack) {
         this.areaCode = areaCode;
@@ -52,6 +55,8 @@ public class Person extends GameObject {
         idWidth = glyph.width;
         glyph.setText(font, formattedAreaCode);
         numberWidth = glyph.width;
+
+        pixel = Content.getAtlas("main").findRegion("pixel");
     }
 
     public String getAreaCode() {
@@ -87,7 +92,16 @@ public class Person extends GameObject {
         return cleared;
     }
 
+    public void stopWaiting() {
+        waiting = false;
+    }
+
     public void update(float dt) {
+
+        if (waiting) {
+            patienceTime -= dt;
+        }
+
         if (x < xdest) {
             x += speed * dt;
             if (x > xdest) {
@@ -120,6 +134,10 @@ public class Person extends GameObject {
     public void render(SpriteBatch sb) {
         sb.setColor(Color.WHITE);
         sb.draw(image, x - width / 2, y - height / 2, width, height);
+        if (waiting) {
+            sb.setColor(patienceColor);
+            sb.draw(pixel, x - width / 2, y - height / 2, width * patienceTime / Vars.PATIENCE_MAX_TIME, height);
+        }
         font.setColor(Color.BLACK);
         font.draw(sb, id, x - width / 2 + 14 - idWidth / 2, y + 4);
         font.draw(sb, formattedAreaCode, x + width / 2 - 40 - numberWidth / 2, y + 4);

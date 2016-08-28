@@ -37,10 +37,6 @@ public class Cord extends GameObject {
     }
 
     public void setDragging(float x, float y) {
-        if (jack != null) {
-            jack.setCord(null);
-            jack = null;
-        }
         dragging = true;
         xdest = (int) x;
         ydest = (int) y;
@@ -66,7 +62,7 @@ public class Cord extends GameObject {
 
     @Override
     public boolean contains(float x, float y) {
-        if (jack != null && jack.isAvailable()) {
+        if (jack != null && jack.canTakeOffCord()) {
             return x > jack.getx() - jack.getWidth() / 2 &&
                     x < jack.getx() + jack.getWidth() / 2 &&
                     y > jack.gety() - jack.getHeight() / 2 &&
