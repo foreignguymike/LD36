@@ -9,8 +9,8 @@ import com.distraction.ld36.Content;
 public class Cord extends GameObject {
 
     private boolean dragging;
-    private int xdest;
-    private int ydest;
+    private float xdest;
+    private float ydest;
     private float dist;
     private float degrees;
     private Jack jack;

@@ -26,8 +26,8 @@ public class Person extends GameObject {
     private Jack callingJack;
     private FinishListener finishListener;
 
-    private int xdest;
-    private int ydest;
+    private float xdest;
+    private float ydest;
     private float speed;
 
     private boolean removing;
@@ -71,12 +71,12 @@ public class Person extends GameObject {
         pixel = Content.getAtlas("main").findRegion("pixel");
     }
 
-    public void setDest(int xdest, int ydest) {
+    public void setDest(float xdest, float ydest) {
         this.xdest = xdest;
         this.ydest = ydest;
     }
 
-    public int getxdest() {
+    public float getxdest() {
         return xdest;
     }
 

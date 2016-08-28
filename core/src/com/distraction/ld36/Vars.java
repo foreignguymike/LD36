@@ -59,7 +59,6 @@ public class Vars {
                 sum++;
                 time += CALL_TIMES.get(i).get(j);
             }
-            System.out.println("time:" + time);
         }
         NUM_CALLS = sum;
         TOTAL_TIME = time;

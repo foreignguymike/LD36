@@ -2,24 +2,24 @@ package com.distraction.ld36.game;
 
 public abstract class GameObject {
 
-    protected int x;
-    protected int y;
-    protected int width;
-    protected int height;
+    protected float x;
+    protected float y;
+    protected float width;
+    protected float height;
 
-    public int getx() {
+    public float getx() {
         return x;
     }
 
-    public int gety() {
+    public float gety() {
         return y;
     }
 
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public float getHeight() {
         return height;
     }
 

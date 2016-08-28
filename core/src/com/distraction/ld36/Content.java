@@ -36,7 +36,7 @@ public class Content {
         params.size = 16;
         params.minFilter = Texture.TextureFilter.Nearest;
         params.magFilter = Texture.TextureFilter.Nearest;
-        params.characters = "0123456789()->MANUALSTARTRUSHBULLETFINISH!CALLERSLEFTCONNECTEDFinalScore: ";
+        params.characters = "0123456789()->MANUALSTARTRUSHBULLETFINISH!CALLERSLEFTCONNECTEDFinalScoreTheOperatorLD#36byMikeSTARTHELP: ";
         putFont("mainFont", gen.generateFont(params));
         params.size = 32;
         putFont("bigFont", gen.generateFont(params));
