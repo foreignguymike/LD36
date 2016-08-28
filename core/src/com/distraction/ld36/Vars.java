@@ -1,5 +1,9 @@
 package com.distraction.ld36;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Vars {
 
     public static final int WIDTH = 400;
@@ -17,28 +21,41 @@ public class Vars {
     public static final float PATIENCE_RAND = 10;
     public static final float PATIENCE_MAX_TIME = PATIENCE_MIN_TIME + PATIENCE_RAND;
 
-    public static final int RUSH = 10;
-    public static final int BULLET = 10;
-    public static final float[] CALL_TIMES =
-            {
-                    // start
-                    2.5f, 0.3f, 8, 7, 7, 0.2f, 7, 7, 7,
+    public static float getNextTime(int index) {
+        int count = 0;
+        for (int i = 0; i < CALL_TIMES.size(); i++) {
+            for (int j = 0; j < CALL_TIMES.get(i).size(); j++) {
+                if (count == index) {
+                    return CALL_TIMES.get(i).get(j);
+                }
+                count++;
+            }
+        }
+        return -1;
+    }
 
-                    // rush
+    public static final Float[] CALL_TIMES1 =
+            {2.5f, 0.3f, 8f, 7f, 7f, 0.2f, 7f, 0.2f, 7f};
+    public static final Float[] CALL_TIMES2 =
+            {5f, 5f, 0.3f, 4.5f, 4.5f, 0.2f, 4.5f, 4.5f, 0.2f, 0.2f, 4.5f, 4.5f, 0.2f, 4.5f};
+    public static final Float[] CALL_TIMES3 =
+            {2.5f, 2.5f, 2.4f, 2.4f, 2.5f, 2.4f, 2.5f, 2.4f, 2.5f, 2.2f, 2f, 2f, 2f, 2f};
+    public static final List<List<Float>> CALL_TIMES;
+    public static final int NUM_CALLS;
 
-                    14,
-                    14,
-                    14,
-                    13,
-                    13,
-                    13,
+    static {
+        CALL_TIMES = new ArrayList<List<Float>>();
+        CALL_TIMES.add(Arrays.asList(CALL_TIMES1));
+        CALL_TIMES.add(Arrays.asList(CALL_TIMES2));
+        CALL_TIMES.add(Arrays.asList(CALL_TIMES3));
 
-                    // bullet
-
-                    9,
-                    8,
-                    8,
-                    7
-            };
+        int sum = 0;
+        for (int i = 0; i < CALL_TIMES.size(); i++) {
+            for (int j = 0; j < CALL_TIMES.get(i).size(); j++) {
+                sum++;
+            }
+        }
+        NUM_CALLS = sum;
+    }
 
 }

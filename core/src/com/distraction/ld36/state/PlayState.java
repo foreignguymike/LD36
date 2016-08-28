@@ -75,23 +75,22 @@ public class PlayState extends State implements Jack.JackListener {
         int width = Vars.PANEL_WIDTH / cords[0].length;
         for (int row = 0; row < cords.length; row++) {
             for (int col = 0; col < cords[0].length; col++) {
-                cords[row][col] = new Cord(col * width + width / 2 + 11, Vars.HEIGHT / 5 + 25 - row * 50);
+                cords[row][col] = new Cord(col * width + width / 2, Vars.HEIGHT / 5 + 25 - row * 50);
             }
         }
     }
 
     private float getNextTime() {
-        if (callCount == Vars.CALL_TIMES.length) {
+        if (callCount == Vars.NUM_CALLS) {
             scrollingText = new ScrollingText("FINISHED!");
             done = true;
             return -1;
-        }
-        if (callCount == Vars.RUSH) {
+        } else if (callCount == Vars.CALL_TIMES1.length) {
             scrollingText = new ScrollingText("RUSH!");
-        } else if (callCount == Vars.BULLET) {
+        } else if (callCount == Vars.CALL_TIMES2.length) {
             scrollingText = new ScrollingText("BULLET!");
         }
-        return Vars.CALL_TIMES[callCount++];
+        return Vars.getNextTime(callCount++);
     }
 
     private void createCaller() {
@@ -271,20 +270,21 @@ public class PlayState extends State implements Jack.JackListener {
 
                         if (jack.getOtherJack() != null && jack.getCord() == null) {
 
-                            if (jack.getOtherJack().getCord() == null) {
+                            Cord matchingCord;
+                            int draggingCordRow = draggingElement == null ? 0 : draggingElement.getRow();
+                            int draggingCordCol = draggingElement == null ? 0 : draggingElement.getCol();
+                            if (draggingCordRow == 0) {
+                                matchingCord = cords[1][draggingCordCol];
+                            } else {
+                                matchingCord = cords[0][draggingCordCol];
+                            }
+
+                            if (jack.getOtherJack().getCord() == null && matchingCord.getJack() == null) {
                                 draggingCord.setJack(jack);
                                 jack.setCord(draggingCord);
                                 hit = true;
                                 break;
                             } else {
-                                Cord matchingCord;
-                                int draggingCordRow = draggingElement == null ? 0 : draggingElement.getRow();
-                                int draggingCordCol = draggingElement == null ? 0 : draggingElement.getCol();
-                                if (draggingCordRow == 0) {
-                                    matchingCord = cords[1][draggingCordCol];
-                                } else {
-                                    matchingCord = cords[0][draggingCordCol];
-                                }
                                 if (matchingCord == jack.getOtherJack().getCord()) {
                                     draggingCord.setJack(jack);
                                     jack.setCord(draggingCord);

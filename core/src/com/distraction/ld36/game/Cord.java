@@ -19,6 +19,8 @@ public class Cord extends GameObject {
     private TextureRegion cordImage;
     private TextureRegion wireImage;
 
+    private Color semiTransparent = new Color(1, 1, 1, 0.5f);
+
     public Cord(int x, int y) {
         this.x = x;
         this.y = y;
@@ -86,6 +88,7 @@ public class Cord extends GameObject {
         sb.draw(bg, x - width / 2, y - height / 2);
 
         if (dragging || jack != null) {
+            sb.setColor(semiTransparent);
             sb.draw(
                     wireImage,
                     x - wireImage.getRegionWidth() / 2,
@@ -98,6 +101,7 @@ public class Cord extends GameObject {
                     1,
                     degrees);
         }
+        sb.setColor(Color.WHITE);
         sb.draw(cordImage, xdest - cordImage.getRegionWidth() / 2, ydest - cordImage.getRegionHeight() / 2);
     }
 
