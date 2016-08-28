@@ -72,10 +72,11 @@ public class Cord extends GameObject {
 
     @Override
     public boolean contains(float x, float y) {
-        boolean inBounds = x > xdest - width / 2 &&
-                    x < xdest + width / 2 &&
-                    y > ydest - height / 2 &&
-                    y < ydest + height / 2;
+        int padding = 6;
+        boolean inBounds = x > this.x - width / 2 - padding &&
+                x < this.x + width / 2 + padding &&
+                y > this.y - height / 2 - padding &&
+                y < this.y + height / 2 + padding;
         if(inBounds) {
             return !(jack != null && !jack.isFinished());
         }

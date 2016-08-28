@@ -9,17 +9,10 @@ import com.distraction.ld36.Content;
 
 public class Jack extends GameObject {
 
-    public interface JackListener {
-        void finish();
-    }
-
     private String id;
-    private JackListener jackListener;
 
     private Cord cord;
     private Jack otherJack;
-
-    private boolean finished;
 
     private TextureRegion jackImage;
     private TextureRegion greenLightImage;
@@ -29,11 +22,10 @@ public class Jack extends GameObject {
     private BitmapFont font;
     private float fontWidth;
 
-    public Jack(int x, int y, int callingId, JackListener jackListener) {
+    public Jack(int x, int y, int callingId) {
         this.x = x;
         this.y = y;
         this.id = String.valueOf(callingId);
-        this.jackListener = jackListener;
 
         jackImage = Content.getAtlas("main").findRegion("jack");
         greenLightImage = Content.getAtlas("main").findRegion("jack_light_green");
@@ -87,17 +79,13 @@ public class Jack extends GameObject {
         }
     }
 
-    public void update(float dt) {
-
-        if (otherJack == null) {
-            return;
-        }
-
-        if (!finished && cord != null && otherJack.getCord() != null) {
-            finished = true;
-            jackListener.finish();
-        }
-
+    @Override
+    public boolean contains(float x, float y) {
+        int padding = 6;
+        return x > this.x - width / 2 - padding &&
+                x < this.x + width / 2 + padding &&
+                y > this.y - height / 2 - padding &&
+                y < this.y + height / 2 + padding;
     }
 
     public void render(SpriteBatch sb) {

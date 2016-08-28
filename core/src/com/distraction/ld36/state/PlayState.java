@@ -16,7 +16,7 @@ import com.distraction.ld36.game.ScrollingText;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayState extends State implements Jack.JackListener {
+public class PlayState extends State implements Person.FinishListener {
 
     private Jack[][] jacks;
     private Cord[][] cords;
@@ -47,7 +47,7 @@ public class PlayState extends State implements Jack.JackListener {
         callers = new ArrayList<Person>();
 
         bg = Content.getAtlas("main").findRegion("bg");
-        font = Content.getFont("bigFont");
+        font = Content.getFont("mainFont");
 
         nextTime = getNextTime();
 
@@ -63,8 +63,7 @@ public class PlayState extends State implements Jack.JackListener {
                 jacks[row][col] = new Jack(
                         col * width + width / 2,
                         Vars.HEIGHT - (row * height + height / 2) - 10,
-                        row * jacks[0].length + col,
-                        this);
+                        row * jacks[0].length + col);
             }
         }
         nextTime = 0;
@@ -87,7 +86,7 @@ public class PlayState extends State implements Jack.JackListener {
             return -1;
         } else if (callCount == Vars.CALL_TIMES1.length) {
             scrollingText = new ScrollingText("RUSH!");
-        } else if (callCount == Vars.CALL_TIMES2.length) {
+        } else if (callCount == Vars.CALL_TIMES1.length + Vars.CALL_TIMES2.length) {
             scrollingText = new ScrollingText("BULLET!");
         }
         return Vars.getNextTime(callCount++);
@@ -122,7 +121,7 @@ public class PlayState extends State implements Jack.JackListener {
             int row2 = elements.get(rand2).getRow();
             int col2 = elements.get(rand2).getCol();
 
-            callers.add(0, new Person(jacks[row][col], jacks[row2][col2]));
+            callers.add(0, new Person(jacks[row][col], jacks[row2][col2], this));
             jacks[row][col].setOtherJack(jacks[row2][col2]);
             jacks[row2][col2].setOtherJack(jacks[row][col]);
             break;
@@ -132,7 +131,7 @@ public class PlayState extends State implements Jack.JackListener {
     }
 
     @Override
-    public void finish() {
+    public void onFinish() {
         points++;
     }
 
@@ -152,12 +151,6 @@ public class PlayState extends State implements Jack.JackListener {
             time = 0;
             nextTime = getNextTime();
             createCaller();
-        }
-
-        for (Jack[] jackArray : jacks) {
-            for (Jack jack : jackArray) {
-                jack.update(dt);
-            }
         }
 
         for (int i = 0; i < callers.size(); i++) {
@@ -185,7 +178,7 @@ public class PlayState extends State implements Jack.JackListener {
     @Override
     public void render(SpriteBatch sb) {
 
-        Gdx.gl.glClearColor(0.4f, 0.2f, 0.2f, 1);
+        Gdx.gl.glClearColor(0.92f, 0.92f, 0.92f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         sb.begin();
@@ -209,6 +202,12 @@ public class PlayState extends State implements Jack.JackListener {
         for (Person caller : callers) {
             caller.render(sb);
         }
+
+        font.setColor(Color.BLACK);
+        font.draw(sb, "TOTAL CALLERS:", Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 5);
+        font.draw(sb, "" + Vars.NUM_CALLS, Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 15);
+        font.draw(sb, "CONNECTED:", Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 30);
+        font.draw(sb, "" + points, Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 40);
 
         if (scrollingText != null) {
             scrollingText.render(sb);

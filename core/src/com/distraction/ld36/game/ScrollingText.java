@@ -33,8 +33,7 @@ public class ScrollingText extends GameObject {
     }
 
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.WHITE);
-        font.setColor(Color.WHITE);
+        font.setColor(Color.BLACK);
         font.draw(sb, text, x - width / 2, y);
     }
 

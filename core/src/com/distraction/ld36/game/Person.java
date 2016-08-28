@@ -12,6 +12,10 @@ public class Person extends GameObject {
 
     public static float REFILL_MULTIPLIER = 2;
 
+    public interface FinishListener {
+        void onFinish();
+    }
+
     private TextureRegion image;
     private TextureRegion pixel;
 
@@ -20,6 +24,7 @@ public class Person extends GameObject {
 
     private Jack originalJack;
     private Jack callingJack;
+    private FinishListener finishListener;
 
     private int xdest;
     private int ydest;
@@ -37,9 +42,10 @@ public class Person extends GameObject {
     private Color patienceColorGreen = new Color(0.1f, 0.6f, 0.1f, 0.4f);
     private Color patienceColorRed = new Color(0.8f, 0.1f, 0.1f, 0.4f);
 
-    public Person(Jack originalJack, Jack callingJack) {
+    public Person(Jack originalJack, Jack callingJack, FinishListener finishListener) {
         this.originalJack = originalJack;
         this.callingJack = callingJack;
+        this.finishListener = finishListener;
 
         image = Content.getAtlas("main").findRegion("person_bg");
         width = image.getRegionWidth();
@@ -97,15 +103,14 @@ public class Person extends GameObject {
                 if (patienceTime < 0) {
                     patienceTime = 0;
                     waiting = false;
-                    System.out.println("remove1");
                     remove();
                 }
             } else {
                 patienceTime += REFILL_MULTIPLIER * dt;
                 if (patienceTime > Vars.PATIENCE_MAX_TIME) {
                     patienceTime = Vars.PATIENCE_MAX_TIME;
-                    System.out.println("remove2");
                     remove();
+                    finishListener.onFinish();
                 }
             }
         }

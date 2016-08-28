@@ -35,13 +35,14 @@ public class Vars {
     }
 
     public static final Float[] CALL_TIMES1 =
-            {2.5f, 0.3f, 8f, 7f, 7f, 0.2f, 7f, 0.2f, 7f};
+            {2.5f, 0.3f, 8f, 7f, 7f, 0.2f, 7f, 6f, 6f};
     public static final Float[] CALL_TIMES2 =
-            {5f, 5f, 0.3f, 4.5f, 4.5f, 0.2f, 4.5f, 4.5f, 0.2f, 0.2f, 4.5f, 4.5f, 0.2f, 4.5f};
+            {4f, 4f, 0.3f, 4.5f, 4.5f, 0.2f, 4.0f, 4.0f, 0.2f, 0.2f, 4.0f, 4.0f, 0.2f, 3.5f};
     public static final Float[] CALL_TIMES3 =
             {2.5f, 2.5f, 2.4f, 2.4f, 2.5f, 2.4f, 2.5f, 2.4f, 2.5f, 2.2f, 2f, 2f, 2f, 2f};
     public static final List<List<Float>> CALL_TIMES;
     public static final int NUM_CALLS;
+    public static final float TOTAL_TIME;
 
     static {
         CALL_TIMES = new ArrayList<List<Float>>();
@@ -50,12 +51,16 @@ public class Vars {
         CALL_TIMES.add(Arrays.asList(CALL_TIMES3));
 
         int sum = 0;
+        float time = 0;
         for (int i = 0; i < CALL_TIMES.size(); i++) {
             for (int j = 0; j < CALL_TIMES.get(i).size(); j++) {
                 sum++;
+                time += CALL_TIMES.get(i).get(j);
             }
         }
         NUM_CALLS = sum;
+        TOTAL_TIME = time;
+        System.out.println(TOTAL_TIME);
     }
 
 }
