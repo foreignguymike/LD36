@@ -2,8 +2,10 @@ package com.distraction.ld36.state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.distraction.ld36.Content;
 import com.distraction.ld36.Vars;
 import com.distraction.ld36.game.Cord;
@@ -36,6 +38,10 @@ public class PlayState extends State implements Jack.JackListener {
     private int draggingCordCol;
 
     private TextureRegion bg;
+    private TextureRegion manualButtonImage;
+    private BitmapFont font;
+    private String manualString = "MANUAL";
+    private Rectangle manualRect = new Rectangle(Vars.PANEL_WIDTH, Vars.HEIGHT - 30, Vars.WIDTH - Vars.PANEL_WIDTH, 30);
 
     public PlayState(GSM gsm) {
         super(gsm);
@@ -49,8 +55,8 @@ public class PlayState extends State implements Jack.JackListener {
         callers = new ArrayList<Person>();
 
         bg = Content.getAtlas("main").findRegion("bg");
-
-        Gdx.input.setInputProcessor(this);
+        manualButtonImage = Content.getAtlas("main").findRegion("manual_button");
+        font = Content.getFont("bigFont");
     }
 
     private void initJacks() {
@@ -91,6 +97,8 @@ public class PlayState extends State implements Jack.JackListener {
 
     private void createCaller() {
 
+        System.out.println("creating caller");
+
         boolean enough = false;
         int numAvailable = 0;
         for (int row = 0; row < jacks.length; row++) {
@@ -107,7 +115,7 @@ public class PlayState extends State implements Jack.JackListener {
                 break;
             }
         }
-        if(!enough) {
+        if (!enough) {
             nextTime = randomNextTime();
             return;
         }
@@ -131,8 +139,9 @@ public class PlayState extends State implements Jack.JackListener {
                     if (jacks[row2][col2].isAvailable()) {
                         String areaCode = manual.getAreaCode(row2, col2);
                         Manual.Element element = manual.getCoordinatesFromAreaCode(areaCode);
-                        Person caller = new Person(areaCode, jacks[element.getRow()][element.getCol()]);
+                        Person caller = new Person(areaCode, jacks[row][col], jacks[element.getRow()][element.getCol()]);
                         jacks[row][col].setCaller(caller);
+                        System.out.println("created caller: " + row + ", " + col);
                         break;
                     }
 
@@ -151,9 +160,13 @@ public class PlayState extends State implements Jack.JackListener {
     @Override
     public void onTalk(Person caller) {
         if (!callers.contains(caller)) {
-            callers.add(caller);
-            System.out.println("jack id: " + manual.getJackIdentifierFromAreaCode(caller.getAreaCode()));
+            callers.add(0, caller);
         }
+    }
+
+    @Override
+    public void onResume() {
+        Gdx.input.setInputProcessor(this);
     }
 
     @Override
@@ -220,6 +233,12 @@ public class PlayState extends State implements Jack.JackListener {
             caller.render(sb);
         }
 
+        sb.setColor(Color.WHITE);
+        sb.draw(manualButtonImage, Vars.PANEL_WIDTH, Vars.HEIGHT - manualButtonImage.getRegionHeight());
+
+        font.setColor(Color.BLACK);
+        font.draw(sb, manualString, Vars.PANEL_WIDTH + 17, Vars.HEIGHT - 8);
+
         sb.end();
     }
 
@@ -241,6 +260,11 @@ public class PlayState extends State implements Jack.JackListener {
         m.x = x;
         m.y = y;
         unproject();
+
+        if (manualRect.contains(m.x, m.y)) {
+            gsm.setUpdateDepth(2);
+            gsm.pushState(new ManualState(gsm, manual));
+        }
 
         for (Jack[] jackArray : jacks) {
             for (Jack jack : jackArray) {

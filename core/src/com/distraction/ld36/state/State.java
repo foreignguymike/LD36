@@ -20,6 +20,8 @@ public abstract class State implements InputProcessor {
         m = new Vector3();
     }
 
+    public abstract void onResume();
+
     public abstract void update(float dt);
 
     public abstract void render(SpriteBatch sb);

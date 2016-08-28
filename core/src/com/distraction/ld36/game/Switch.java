@@ -84,6 +84,7 @@ public class Switch extends GameObject {
         sb.setColor(Color.WHITE);
         sb.draw(bg, x - width / 2, y - bg.getRegionHeight() / 2);
         sb.draw(switchImage, x - width / 2, y - height / 2 + position.getValue());
+
     }
 
 }

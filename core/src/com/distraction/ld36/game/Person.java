@@ -1,6 +1,8 @@
 package com.distraction.ld36.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.distraction.ld36.Content;
@@ -10,7 +12,9 @@ public class Person extends GameObject {
 
     private TextureRegion image;
 
+    private String id;
     private String areaCode;
+    private String formattedAreaCode;
     private String number;
     private Jack callingJack;
 
@@ -20,18 +24,34 @@ public class Person extends GameObject {
 
     private boolean cleared;
 
-    public Person(String areaCode, Jack callingJack) {
+    private BitmapFont font;
+    private float idWidth;
+    private float numberWidth;
+
+    private float patienceTime = (float) (Math.random() * 10 + 20);
+
+    public Person(String areaCode, Jack originalJack, Jack callingJack) {
         this.areaCode = areaCode;
         this.callingJack = callingJack;
+        formattedAreaCode = "(" + areaCode + ")";
         number = Manual.formatRandomNumberFromAreaCode(areaCode);
-        width = Vars.WIDTH - Vars.PANEL_WIDTH;
-        height = Vars.CALLER_HEIGHT;
+
+        image = Content.getAtlas("main").findRegion("person_bg");
+        width = image.getRegionWidth();
+        height = image.getRegionHeight();
         x = Vars.PANEL_WIDTH + width / 2;
         y = -height / 2;
         xdest = x;
         ydest = y;
 
-        image = new TextureRegion(Content.getTexture("test"));
+        id = originalJack.getId();
+
+        font = Content.getFont("mainFont");
+        GlyphLayout glyph = new GlyphLayout();
+        glyph.setText(font, String.valueOf(id));
+        idWidth = glyph.width;
+        glyph.setText(font, formattedAreaCode);
+        numberWidth = glyph.width;
     }
 
     public String getAreaCode() {
@@ -98,8 +118,11 @@ public class Person extends GameObject {
     }
 
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.BLUE);
+        sb.setColor(Color.WHITE);
         sb.draw(image, x - width / 2, y - height / 2, width, height);
+        font.setColor(Color.BLACK);
+        font.draw(sb, id, x - width / 2 + 14 - idWidth / 2, y + 4);
+        font.draw(sb, formattedAreaCode, x + width / 2 - 40 - numberWidth / 2, y + 4);
     }
 
 }

@@ -23,6 +23,7 @@ public class Jack extends GameObject {
     private Jack callingJack;
 
     private float baseTime;
+    private float callOperatorTime;
     private float pickupTime;
     private float pickupTimer;
     private float talkTime;
@@ -34,19 +35,22 @@ public class Jack extends GameObject {
     private boolean linked;
     private boolean talking;
 
+    private boolean talkedTo;
+
     private TextureRegion jackImage;
     private TextureRegion redLightImage;
     private TextureRegion greenLightImage;
     private TextureRegion yellowLightImage;
     private TextureRegion offLightImage;
+    private TextureRegion pixel;
 
     private BitmapFont font;
     private float fontWidth;
 
-    public Jack(int x, int y, int id, JackListener jackListener) {
+    public Jack(int x, int y, int callingId, JackListener jackListener) {
         this.x = x;
         this.y = y;
-        this.id = String.valueOf(id);
+        this.id = String.valueOf(callingId);
         this.jackListener = jackListener;
 
         jackImage = Content.getAtlas("main").findRegion("jack");
@@ -54,11 +58,12 @@ public class Jack extends GameObject {
         greenLightImage = Content.getAtlas("main").findRegion("jack_light_green");
         yellowLightImage = Content.getAtlas("main").findRegion("jack_light_yellow");
         offLightImage = Content.getAtlas("main").findRegion("jack_light_off");
+        pixel = Content.getAtlas("main").findRegion("pixel");
 
         width = jackImage.getRegionWidth();
         height = jackImage.getRegionHeight();
 
-        font = Content.getFont("12");
+        font = Content.getFont("mainFont");
         GlyphLayout glyph = new GlyphLayout();
         glyph.setText(font, String.valueOf(this.id));
         fontWidth = glyph.width;
@@ -68,10 +73,15 @@ public class Jack extends GameObject {
         return !lit && callingJack == null;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void talk() {
         if (caller == null) {
             return;
         }
+        talkedTo = true;
         jackListener.onTalk(caller);
         ringing = false;
         linked = false;
@@ -91,6 +101,9 @@ public class Jack extends GameObject {
         if ((callingJack == null || ringing) && caller == null) {
             return;
         }
+        if (caller != null && !talkedTo) {
+            return;
+        }
         linked = true;
         if (callingJack.isLinked()) {
             setTalkTimer((float) (Math.random() * 15 + 5));
@@ -105,7 +118,7 @@ public class Jack extends GameObject {
         if (pickedUp) {
             return;
         }
-        if (callingJack != null) {
+        if (callingJack != null && caller == null) {
             ringing = true;
             pickupTimer = (float) (Math.random() * Vars.PICKUP_RAND + Vars.PICKUP_MIN_TIME);
         }
@@ -117,6 +130,7 @@ public class Jack extends GameObject {
             callingJack.setCallingJack(null);
         } else {
             lit = true;
+            talkedTo = false;
             setCallingJack(caller.getCallingJack());
             callingJack.setCallingJack(this);
         }
@@ -155,30 +169,12 @@ public class Jack extends GameObject {
         return cord;
     }
 
-    public void update(float dt) {
-        baseTime += dt;
-        if (ringing) {
-            pickupTime += dt;
-            if (pickupTime >= pickupTimer) {
-                ringing = false;
-                pickedUp = true;
-            }
-        }
-        if (talking) {
-            talkTime += dt;
-            if (talkTime >= talkTimer) {
-                if (caller != null) {
-                    caller.remove();
-                }
-                caller = null;
-                clear();
-            }
-        }
-    }
-
     private void clear() {
+        System.out.println("cleared");
+        talkedTo = false;
         talkingTo = false;
         lit = false;
+        caller = null;
         callingJack = null;
         pickupTime = 0;
         talkTime = 0;
@@ -188,12 +184,43 @@ public class Jack extends GameObject {
         talking = false;
     }
 
+    public void update(float dt) {
+        baseTime += dt;
+
+        if (caller != null && !talkedTo) {
+            callOperatorTime += dt;
+            if (callOperatorTime > Vars.CALLING_OPERATOR_TIME) {
+                clear();
+            }
+        }
+
+        if (ringing) {
+            pickupTime += dt;
+            if (pickupTime >= pickupTimer) {
+                ringing = false;
+                pickedUp = true;
+            }
+        }
+
+        if (talking) {
+            talkTime += dt;
+            if (talkTime >= talkTimer) {
+                System.out.println("finished");
+                if (caller != null) {
+                    caller.remove();
+                }
+                caller = null;
+                clear();
+            }
+        }
+    }
+
     public void render(SpriteBatch sb) {
         sb.setColor(Color.WHITE);
         sb.draw(jackImage, x - width / 2, y - height / 2);
         if (talking) {
             sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
-        } else if (caller != null && lit && !talkingTo) {
+        } else if (caller != null && !talkedTo) {
             if (baseTime % 0.1f < 0.05f) {
                 sb.draw(greenLightImage, x - greenLightImage.getRegionWidth() / 2, y + 12);
             } else {
@@ -216,8 +243,20 @@ public class Jack extends GameObject {
         } else {
             sb.draw(offLightImage, x - redLightImage.getRegionWidth() / 2, y + 12);
         }
-        sb.setColor(Color.BLACK);
-        font.draw(sb, "" + id, x - fontWidth / 2, y - height / 2 - 2);
+        if (ringing) {
+            sb.setColor(Color.GREEN);
+            sb.draw(pixel, x - width / 2, y + 12, width * (pickupTimer - pickupTime) / Vars.PICKUP_MAX_TIME, 2);
+        }
+        if (talking) {
+            sb.setColor(Color.GREEN);
+            sb.draw(pixel, x - width / 2, y + 12, width * (talkTimer - talkTime) / Vars.CALL_MAX_TIME, 2);
+        }
+        if (caller != null && !talkedTo) {
+            sb.setColor(Color.GREEN);
+            sb.draw(pixel, x - width / 2, y + 12, width * (Vars.CALLING_OPERATOR_TIME - callOperatorTime) / Vars.CALLING_OPERATOR_TIME, 2);
+        }
+        font.setColor(Color.WHITE);
+        font.draw(sb, id, x - fontWidth / 2, y - height / 2 - 2);
     }
 
 }

@@ -13,20 +13,12 @@ import java.util.Map;
 
 public class Content {
 
-    private static Map<String, Texture> textureMap;
     private static Map<String, TextureAtlas> atlasMap;
     private static Map<String, BitmapFont> fontMap;
 
     static {
-        textureMap = new HashMap<String, Texture>();
         atlasMap = new HashMap<String, TextureAtlas>();
         fontMap = new HashMap<String, BitmapFont>();
-
-        Pixmap pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.WHITE);
-        pixmap.fillRectangle(0, 0, 20, 20);
-        Texture texture = new Texture(pixmap);
-        putTexture("test", texture);
 
         putAtlas("main", new TextureAtlas(Gdx.files.internal("pack.pack")));
 
@@ -35,8 +27,10 @@ public class Content {
         params.size = 16;
         params.minFilter = Texture.TextureFilter.Nearest;
         params.magFilter = Texture.TextureFilter.Nearest;
-        params.characters = "0123456789";
-        putFont("12", gen.generateFont(params));
+        params.characters = "0123456789()->MANUAL ";
+        putFont("mainFont", gen.generateFont(params));
+        params.size = 32;
+        putFont("bigFont", gen.generateFont(params));
         gen.dispose();
     }
 
@@ -46,14 +40,6 @@ public class Content {
 
     public static TextureAtlas getAtlas(String key) {
         return atlasMap.get(key);
-    }
-
-    public static void putTexture(String key, Texture texture) {
-        textureMap.put(key, texture);
-    }
-
-    public static Texture getTexture(String key) {
-        return textureMap.get(key);
     }
 
     public static void putFont(String key, BitmapFont font) {

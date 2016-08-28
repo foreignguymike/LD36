@@ -35,6 +35,10 @@ public class Manual {
         return areaCodes[row][col];
     }
 
+    public String[][] getAreaCodes() {
+        return areaCodes;
+    }
+
     public Element getCoordinatesFromAreaCode(String areaCode) {
         for (int row = 0; row < areaCodes.length; row++) {
             for (int col = 0; col < areaCodes[0].length; col++) {
