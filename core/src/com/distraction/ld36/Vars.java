@@ -62,7 +62,6 @@ public class Vars {
         }
         NUM_CALLS = sum;
         TOTAL_TIME = time;
-        System.out.println(TOTAL_TIME);
     }
 
 }

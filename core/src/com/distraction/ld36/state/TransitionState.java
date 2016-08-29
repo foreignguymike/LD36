@@ -113,7 +113,6 @@ public class TransitionState extends State {
 
     public void update(float dt) {
         if (!doneExpanding) {
-            System.out.println("expanding");
             boolean okay = true;
             for (int row = 0; row < expands.length; row++) {
                 for (int col = 0; col < expands[0].length; col++) {
