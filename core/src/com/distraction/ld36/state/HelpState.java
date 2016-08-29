@@ -8,15 +8,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.distraction.ld36.Content;
 import com.distraction.ld36.Vars;
+import com.distraction.ld36.game.Button;
 import com.distraction.ld36.game.Cord;
 import com.distraction.ld36.game.Jack;
 import com.distraction.ld36.game.Person;
-import com.distraction.ld36.game.ScrollingText;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayState extends State implements Person.FinishListener {
+public class HelpState extends State implements Person.FinishListener {
 
     private Jack[][] jacks;
     private Cord[][] cords;
@@ -24,34 +24,29 @@ public class PlayState extends State implements Person.FinishListener {
     private List<Person> callers;
 
     private float time;
-    private float nextTime;
-    private int callCount = 0;
 
     private Cord draggingCord;
-    private Element draggingElement;
+    private PlayState.Element draggingElement;
 
     private TextureRegion bg;
     private BitmapFont font;
 
-    private int points;
-    private boolean done;
+    private Button button;
 
-    private ScrollingText scrollingText;
-
-    public PlayState(GSM gsm) {
+    public HelpState(GSM gsm) {
         super(gsm);
 
         initJacks();
         initCords();
 
         callers = new ArrayList<Person>();
+        createCaller();
 
         bg = Content.getAtlas("main").findRegion("bg");
-        font = Content.getFont("mainFont");
+        font = Content.getFont("tutorial");
 
-        nextTime = getNextTime();
+        button = new Button("BACK", Vars.WIDTH - (Vars.WIDTH - Vars.PANEL_WIDTH) / 2, Vars.HEIGHT - 15);
 
-        scrollingText = new ScrollingText("START");
         Content.getSound("start").play();
     }
 
@@ -67,7 +62,6 @@ public class PlayState extends State implements Person.FinishListener {
                         row * jacks[0].length + col);
             }
         }
-        nextTime = 0;
     }
 
     private void initCords() {
@@ -80,35 +74,15 @@ public class PlayState extends State implements Person.FinishListener {
         }
     }
 
-    private float getNextTime() {
-        if (callCount == Vars.NUM_CALLS) {
-            scrollingText = new ScrollingText("FINISHED!");
-            Content.getSound("start").play();
-            done = true;
-            return -1;
-        } else if (callCount == Vars.CALL_TIMES1.length) {
-            scrollingText = new ScrollingText("RUSH!");
-            Content.getSound("start").play();
-        } else if (callCount == Vars.CALL_TIMES1.length + Vars.CALL_TIMES2.length) {
-            scrollingText = new ScrollingText("BULLET!");
-            Content.getSound("start").play();
-        }
-        return Vars.getNextTime(callCount++);
-    }
-
     private void createCaller() {
 
-        List<Element> elements = new ArrayList<Element>();
+        List<PlayState.Element> elements = new ArrayList<PlayState.Element>();
         for (int row = 0; row < jacks.length; row++) {
             for (int col = 0; col < jacks[0].length; col++) {
                 if (jacks[row][col].isAvailable()) {
-                    elements.add(new Element(row, col));
+                    elements.add(new PlayState.Element(row, col));
                 }
             }
-        }
-        if (elements.size() < 2) {
-            nextTime = getNextTime();
-            return;
         }
 
         int rand1 = (int) (Math.random() * elements.size());
@@ -137,7 +111,6 @@ public class PlayState extends State implements Person.FinishListener {
 
     @Override
     public void onFinish() {
-        points++;
         Content.getSound("point").play(0.7f);
     }
 
@@ -151,12 +124,6 @@ public class PlayState extends State implements Person.FinishListener {
 
         time += dt;
 
-        if (!done && time >= nextTime) {
-            time = 0;
-            nextTime = getNextTime();
-            createCaller();
-        }
-
         for (int i = 0; i < callers.size(); i++) {
             Person caller = callers.get(i);
             caller.setDest(caller.getxdest(), i * caller.getHeight() + caller.getHeight() / 2);
@@ -167,13 +134,7 @@ public class PlayState extends State implements Person.FinishListener {
             caller.update(dt);
             if (caller.isCleared()) {
                 callers.remove(i);
-            }
-        }
-
-        if (scrollingText != null) {
-            scrollingText.update(dt);
-            if (scrollingText.getx() < -scrollingText.getWidth()) {
-                scrollingText = null;
+                createCaller();
             }
         }
 
@@ -208,14 +169,28 @@ public class PlayState extends State implements Person.FinishListener {
         }
 
         font.setColor(Color.BLACK);
-        font.draw(sb, "TOTAL CALLERS:", Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 5);
-        font.draw(sb, "" + Vars.NUM_CALLS, Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 15);
-        font.draw(sb, "CONNECTED:", Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 30);
-        font.draw(sb, "" + points, Vars.PANEL_WIDTH + 5, Vars.HEIGHT - 40);
 
-        if (scrollingText != null) {
-            scrollingText.render(sb);
-        }
+        int h = Vars.HEIGHT - 25;
+        font.draw(sb, "To play, you", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "must connect", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "two cords from", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "the same", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "column at the", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "bottom to the", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "correct jacks", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "at the top", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "using drag", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "and drop.", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "The correct", Vars.PANEL_WIDTH + 5, h -= 20);
+        font.draw(sb, "jacks are", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "shown by the", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "incoming calls", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "on this panel.", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "Each call has", Vars.PANEL_WIDTH + 5, h -= 20);
+        font.draw(sb, "a time limit", Vars.PANEL_WIDTH + 5, h -= 10);
+        font.draw(sb, "so be quick!", Vars.PANEL_WIDTH + 5, h -= 10);
+
+        button.render(sb);
 
         sb.end();
     }
@@ -239,12 +214,16 @@ public class PlayState extends State implements Person.FinishListener {
         m.y = y;
         unproject();
 
+        if (button.contains(m.x, m.y)) {
+            gsm.setState(new TransitionState(gsm, this, new MenuState(gsm)));
+        }
+
         for (int row = 0; row < cords.length; row++) {
             for (int col = 0; col < cords[row].length; col++) {
                 Cord cord = cords[row][col];
                 if (cord.contains(m.x, m.y)) {
                     draggingCord = cord;
-                    draggingElement = new Element(row, col);
+                    draggingElement = new PlayState.Element(row, col);
                     Jack jack = draggingCord.getJack();
                     if (jack != null) {
                         jack.setCord(null);
@@ -310,7 +289,7 @@ public class PlayState extends State implements Person.FinishListener {
 
             }
 
-            if(hit) {
+            if (hit) {
                 Content.getSound("plugin").play(0.2f);
             } else {
                 Content.getSound("miss").play(0.5f);
@@ -323,21 +302,4 @@ public class PlayState extends State implements Person.FinishListener {
         return true;
     }
 
-    public static class Element {
-        private int row;
-        private int col;
-
-        public Element(int row, int col) {
-            this.row = row;
-            this.col = col;
-        }
-
-        public int getRow() {
-            return row;
-        }
-
-        public int getCol() {
-            return col;
-        }
-    }
 }

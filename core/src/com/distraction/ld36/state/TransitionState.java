@@ -80,7 +80,6 @@ public class TransitionState extends State {
     private State prev;
     private State next;
 
-    // expand stuff
     private Expand[][] expands;
     private boolean doneExpanding;
     private boolean doneContracting;

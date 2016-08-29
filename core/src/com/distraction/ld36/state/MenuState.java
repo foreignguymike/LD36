@@ -68,6 +68,10 @@ public class MenuState extends State {
             gsm.setState(new TransitionState(gsm, this, new PlayState(gsm)));
         }
 
+        if (help.contains(m.x, m.y)) {
+            gsm.setState(new TransitionState(gsm, this, new HelpState(gsm)));
+        }
+
         return false;
     }
 }
